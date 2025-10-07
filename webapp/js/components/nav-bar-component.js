@@ -1,6 +1,6 @@
-// nav-bar-component.js
 import { LitElement, html, css } from "lit";
 import "./nav-bar-items.js";
+import "./nav-bar-separator.js";
 
 export class NavBar extends LitElement {
   static styles = css`
@@ -14,17 +14,12 @@ export class NavBar extends LitElement {
       border-bottom: 2px solid #ccc;
       font-family: sans-serif;
     }
-      
-    .separator {
-      color: #aaa;
-      font-weight: 300;
-    }
   `;
 
   render() {
     return html`
       <nav-bar-items label="Resultaten"></nav-bar-items>
-      <span class="separator">|</span>
+      <nav-bar-separator></nav-bar-separator>
       <nav-bar-items label="Bob-game"></nav-bar-items>
     `;
   }
