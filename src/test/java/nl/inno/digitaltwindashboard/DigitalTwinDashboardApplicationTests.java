@@ -1,4 +1,4 @@
-package org.example.digitaltwindashboard;
+package nl.inno.digitaltwindashboard;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

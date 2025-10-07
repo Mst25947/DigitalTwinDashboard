@@ -1,4 +1,4 @@
-package org.example.digitaltwindashboard;
+package nl.inno.digitaltwindashboard;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
