@@ -1,0 +1,98 @@
+/* Algemene stijlen */
+body { font-family: sans-serif; padding: 2rem; background-color: #f7f9fc; }
+pre { background: #e9ecef; padding: 1rem; border-radius: 5px; white-space: pre-wrap; overflow-x: auto; }
+.hidden { display: none !important; }
+select { padding: 0.5rem; margin-right: 1rem; border-radius: 5px; border: 1px solid #ced4da; }
+button { padding: 0.5rem 1rem; border: none; border-radius: 5px; background-color: #007bff; color: white; cursor: pointer; transition: background-color 0.2s; }
+button:hover { background-color: #0056b3; }
+
+/* DASHBOARD LAYOUT */
+#dashboard-container {
+    display: flex;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+#sidebar {
+    flex: 0 0 300px;
+    background-color: white;
+    padding: 15px;
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+#main-content {
+    flex-grow: 1;
+    background-color: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+/* KPI Stijlen */
+#kpi-cards { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+.kpi-card {
+    padding: 15px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    text-align: center;
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+.kpi-card h4 { margin: 0 0 5px 0; font-size: 0.9em; color: #6c757d; }
+.kpi-card p { font-size: 1.8em; font-weight: bold; margin: 0; }
+
+/* Accordeon Stijlen */
+.accordion-item {
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    overflow: hidden;
+}
+
+.accordion-header {
+    background-color: #f8f9fa;
+    padding: 15px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: bold;
+    color: #34495e;
+    transition: background-color 0.2s;
+}
+
+.accordion-header:hover {
+    background-color: #e9ecef;
+}
+
+.accordion-header .arrow {
+    transition: transform 0.3s ease;
+    font-size: 1.2em;
+}
+
+.accordion-header.active .arrow {
+    transform: rotate(90deg);
+}
+
+.accordion-content {
+    padding: 0 15px;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out, padding 0.3s ease-out;
+    background-color: #ffffff;
+}
+
+.accordion-content.open {
+    max-height: 300px;
+    padding: 15px;
+}
+
+.accordion-content p {
+    margin-bottom: 5px;
+    font-size: 0.9em;
+    color: #555;
+}
+.accordion-content strong {
+    color: #333;
+}
