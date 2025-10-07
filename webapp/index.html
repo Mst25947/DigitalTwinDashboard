@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Digital Twin Dashboard</title>
+  <style>
+    body { font-family: sans-serif; padding: 2rem; }
+    pre { background: #f0f0f0; padding: 1rem; border-radius: 5px; }
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+
+<h1>Digital Twin Dashboard</h1>
+
+<div id="router">
+  <div id="home">
+    <h2>Choose Parametric Design</h2>
+    <label>
+      Enter ID:
+      <input type="number" id="designId" />
+    </label>
+    <button id="fetchBtn">Fetch Data</button>
+    <p id="loading" class="hidden">Loading...</p>
+    <p id="error" class="hidden" style="color:red"></p>
+  </div>
+
+  <div id="dataView" class="hidden">
+    <button id="backBtn">Back</button>
+    <h2>Data:</h2>
+    <pre id="dataOutput"></pre>
+  </div>
+</div>
+
+</body>
+</html>
+<script>
+  const fetchBtn = document.getElementById("fetchBtn");
+  const backBtn = document.getElementById("backBtn");
+  const designIdInput = document.getElementById("designId");
+  const loadingEl = document.getElementById("loading");
+  const errorEl = document.getElementById("error");
+  const dataView = document.getElementById("dataView");
+  const homeView = document.getElementById("home");
+  const dataOutput = document.getElementById("dataOutput");
+
+  fetchBtn.addEventListener("click", async () => {
+    const id = designIdInput.value;
+    if (!id) return;
+
+    loadingEl.classList.remove("hidden");
+    errorEl.classList.add("hidden");
+    dataOutput.textContent = "";
+
+    try {
+      const res = await fetch(`api/tygron/parametric_designs/${id}`);
+
+      if (!res.ok) {
+        const errorText = await res.text();
+        console.error("Fetch failed, got:", errorText);
+        throw new Error(`Fetch failed: ${res.status}`);
+      }
+
+      const data = await res.json();
+      console.log("Received data:", data);
+
+      dataOutput.textContent = JSON.stringify(data, null, 2);
+      homeView.classList.add("hidden");
+      dataView.classList.remove("hidden");
+    } catch (err) {
+      errorEl.textContent = err.message;
+      errorEl.classList.remove("hidden");
+    } finally {
+      loadingEl.classList.add("hidden");
+    }
+  });
+
+  backBtn.addEventListener("click", () => {
+    homeView.classList.remove("hidden");
+    dataView.classList.add("hidden");
+  });
+</script>
