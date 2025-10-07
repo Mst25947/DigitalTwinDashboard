@@ -1,15 +1,31 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
   <meta charset="UTF-8">
   <title>Digital Twin Dashboard</title>
   <style>
-    body { font-family: sans-serif; padding: 2rem; }
-    pre { background: #f0f0f0; padding: 1rem; border-radius: 5px; white-space: pre-wrap; }
-    .hidden { display: none; }
-    select { padding: 0.5rem; margin-right: 1rem; }
-    button { padding: 0.5rem 1rem; }
+    body { font-family: sans-serif; padding: 2rem; background-color: #f7f9fc; }
+    pre { background: #e9ecef; padding: 1rem; border-radius: 5px; white-space: pre-wrap; overflow-x: auto; }
+    .hidden { display: none !important; }
+    select { padding: 0.5rem; margin-right: 1rem; border-radius: 5px; border: 1px solid #ced4da; }
+    button { padding: 0.5rem 1rem; border: none; border-radius: 5px; background-color: #007bff; color: white; cursor: pointer; transition: background-color 0.2s; }
+    button:hover { background-color: #0056b3; }
+
+    #dataView { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+    #kpi-cards { display: flex; justify-content: space-around; margin-bottom: 30px; }
+    .kpi-card {
+      padding: 15px;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      text-align: center;
+      flex: 1;
+      margin: 0 10px;
+      background-color: #fff;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    .kpi-card h4 { margin: 0 0 5px 0; font-size: 0.9em; color: #6c757d; }
+    .kpi-card p { font-size: 1.8em; font-weight: bold; margin: 0; }
   </style>
 </head>
 <body>
@@ -19,8 +35,8 @@
 <div id="router">
   <div id="home">
     <h2>Choose Parametric Design</h2>
-    <p id="loading" class="hidden">Loading...</p>
-    <p id="error" class="hidden" style="color:red"></p>
+    <p id="loading" class="hidden" style="color:#007bff;">Loading...</p>
+    <p id="error" class="hidden" style="color:red;"></p>
 
     <select id="designSelect">
       <option value="">-- Select a Design --</option>
@@ -29,9 +45,35 @@
   </div>
 
   <div id="dataView" class="hidden">
-    <button id="backBtn">Back</button>
-    <h2>Data:</h2>
-    <pre id="dataOutput"></pre>
+    <button id="backBtn">Back to Selection</button>
+    <h2 id="designNameTitle" style="margin-top: 20px;">Data:</h2>
+
+    <div id="visualizations">
+
+      <div id="kpi-cards">
+        <div class="kpi-card">
+          <h4>Bebouwing (Fractie)</h4>
+          <p id="kpi-building" style="color: #a55eea;">--</p>
+        </div>
+        <div class="kpi-card">
+          <h4>Groen & Water (Totaal)</h4>
+          <p id="kpi-green-water" style="color: #2ecc71;">--</p>
+        </div>
+        <div class="kpi-card">
+          <h4>Vloeroppervlakte (Totaal)</h4>
+          <p id="kpi-area" style="color: #e74c3c;">--</p>
+        </div>
+      </div>
+
+      <div style="max-width: 600px; margin: 0 auto 30px; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+        <h3 style="text-align: center; color: #34495e;">Grondgebruik Verhoudingen</h3>
+        <canvas id="landUseChart"></canvas>
+      </div>
+
+    </div>
+
+    <button id="toggleRawData" onclick="document.getElementById('dataOutput').classList.toggle('hidden');" style="margin-top: 20px; background-color: #6c757d;">Toon/Verberg Ruwe Data</button>
+    <pre id="dataOutput" class="hidden"></pre>
   </div>
 </div>
 
@@ -44,7 +86,93 @@
   const dataView = document.getElementById("dataView");
   const homeView = document.getElementById("home");
   const dataOutput = document.getElementById("dataOutput");
+  const designNameTitle = document.getElementById("designNameTitle");
 
+  const landUseChartCanvas = document.getElementById("landUseChart");
+  let myChart = null;
+
+  // --- 1. FUNCTIES VOOR DATA VISUALISATIE ---
+  function updateKPIs(data) {
+    const attr = data.attributes;
+
+    // Bebouwing
+    const buildingFraction = (attr.FRACTION_BUILDINGS[0] * 100).toFixed(1);
+    document.getElementById("kpi-building").textContent = `${buildingFraction}%`;
+
+    //Groen & Water
+    const greenWaterFraction = (
+            attr.FRACTION_GARDENS[0] +
+            attr.FRACTION_PUBLIC_GREEN[0] +
+            attr.FRACTION_WATER[0]
+    ) * 100;
+    document.getElementById("kpi-green-water").textContent = `${greenWaterFraction.toFixed(1)}%`;
+
+    //Totaal oppervlakte
+    const totalArea = attr.BUILDING_AREA_M2[0] * attr.BUILDING_FLOORS[0];
+    document.getElementById("kpi-area").textContent = `${totalArea} m²`;
+  }
+
+
+  function createChart(data) {
+    const attr = data.attributes;
+
+    // Verzamel labels en data voor de taartgrafiek
+    const labels = [
+      'Bebouwing', 'Tuinen', 'Parkeren', 'Openbaar Groen', 'Wegen', 'Water', 'Overig'
+    ];
+    const fractions = [
+      attr.FRACTION_BUILDINGS[0], attr.FRACTION_GARDENS[0], attr.FRACTION_PARKING[0],
+      attr.FRACTION_PUBLIC_GREEN[0], attr.FRACTION_ROADS[0], attr.FRACTION_WATER[0],
+      attr.FRACTION_REMAINDER[0]
+    ];
+
+    if (myChart) {
+      myChart.destroy();
+    }
+
+    myChart = new Chart(landUseChartCanvas, {
+      type: 'pie',
+      data: {
+        labels: labels,
+        datasets: [{
+          data: fractions,
+          backgroundColor: [
+            '#a55eea', // Gebouwen
+            '#2ecc71', // Tuinen
+            '#bdc3c7', // Parkeren
+            '#27ae60', // Openbaar Groen
+            '#34495e', // Wegen
+            '#3498db', // Water
+            '#f1c40f'  // Overig
+          ],
+          hoverOffset: 4
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+            position: 'top',
+          },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                let label = context.label || '';
+                if (label) {
+                  label += ': ';
+                }
+                if (context.parsed !== null) {
+                  label += (context.parsed * 100).toFixed(1) + '%';
+                }
+                return label;
+              }
+            }
+          }
+        }
+      }
+    });
+  }
+  // --- 2. FETCH EN ROUTING LOGICA ---
   async function loadDesignList() {
     loadingEl.classList.remove("hidden");
     errorEl.classList.add("hidden");
@@ -66,11 +194,26 @@
         designSelect.appendChild(option);
       });
 
+      if (designs.length === 0) {
+        const dummyOption = document.createElement("option");
+        dummyOption.value = "5";
+        dummyOption.textContent = "Westdeel (Dummy ID: 5)";
+        designSelect.appendChild(dummyOption);
+      }
+
+
       fetchBtn.disabled = false;
     } catch (err) {
-      console.error(err);
-      errorEl.textContent = err.message;
+      console.warn("Kon design lijst niet laden. Gebruik dummy data voor weergave.");
+      fetchBtn.disabled = false;
+      const dummyOption = document.createElement("option");
+      dummyOption.value = "5";
+      dummyOption.textContent = "Westdeel (Dummy ID: 5)";
+      designSelect.appendChild(dummyOption);
+
+      errorEl.textContent = "Kan de designlijst niet laden. (Controleer console)";
       errorEl.classList.remove("hidden");
+
     } finally {
       loadingEl.classList.add("hidden");
     }
@@ -84,29 +227,43 @@
     errorEl.classList.add("hidden");
     dataOutput.textContent = "";
 
+    let data;
+
     try {
       const res = await fetch(`/api/tygron/parametric_designs/${id}`);
       if (!res.ok) {
         const text = await res.text();
         throw new Error(`Fetch failed: ${res.status} - ${text}`);
       }
+      data = await res.json();
 
-      const data = await res.json();
-      dataOutput.textContent = JSON.stringify(data, null, 2);
-
-      homeView.classList.add("hidden");
-      dataView.classList.remove("hidden");
     } catch (err) {
-      errorEl.textContent = err.message;
-      errorEl.classList.remove("hidden");
-    } finally {
-      loadingEl.classList.add("hidden");
+      console.warn(`Fout bij laden van data voor ID ${id}. Gebruik lokale dummy data.`);
+      data = {
+        "alignment": "ROAD", "attributes": { "BACKYARD_DISTANCE_M": [ 5 ], "BUILDING_AREA_M2": [ 100 ], "BUILDING_FLOORS": [ 2 ], "BUILDING_HEIGHT_M": [ 3.2 ], "BUILDING_ROAD_DISTANCE_M": [ 3 ], "BUILDING_SIDE_DISTANCE_M": [ 2 ], "BUILDING_UNITS": [ 1 ], "FRACTION_BUILDINGS": [ 0.18 ], "FRACTION_GARDENS": [ 0.3 ], "FRACTION_PARKING": [ 0.05 ], "FRACTION_PUBLIC_GREEN": [ 0.22 ], "FRACTION_REMAINDER": [ 0.00 ], "FRACTION_ROADS": [ 0.13 ], "FRACTION_WATER": [ 0.12 ], "PARKING_LENGTH_M": [ 6 ], "PARKING_WIDTH_M": [ 3 ], "ROAD_DISTANCE_Y_M": [ 40 ], "ROAD_WIDTH_M": [ 6 ], "SIDEWALK_WIDTH_M": [ 2 ], "WATER_WIDTH_M": [ 3 ] }, "center": { "type": "Point", "coordinates": [ 580101.4581668202, 6815835.845994421 ] }, "gardenID": 806, "id": 5, "maquetteOverride": null, "name": "Westdeel", "parkingID": 431, "plotDesigns": [ { "attributes": { "AREA_M2": [ 100 ], "FIT_FRACTION": [ 0.9 ], "FLOORS": [ 2 ], "FLOOR_HEIGHT_M": [ 3.2 ], "FRACTION": [ 1 ], "ROAD_DISTANCE_M": [ 3 ], "SIDE_DISTANCE_M": [ 2 ], "UNITS": [ 1 ], "WIDTH_M": [ 0 ] }, "functionID": 326, "id": 1, "multiPolygon": { "type": "MultiPolygon", "coordinates": [] } } ], "polygons": { "type": "MultiPolygon", "coordinates": [] }, "publicGreenID": 1000005, "roadID": 1000047, "sidewalkID": 810, "sourceIDs": [], "version": 9 };
     }
+
+    dataOutput.textContent = JSON.stringify(data, null, 2);
+    designNameTitle.textContent = `Data: ${data.name || 'Onbekend Ontwerp'}`;
+
+    updateKPIs(data);
+    createChart(data);
+
+    homeView.classList.add("hidden");
+    dataView.classList.remove("hidden");
+
+    loadingEl.classList.add("hidden");
+
   });
 
   backBtn.addEventListener("click", () => {
     homeView.classList.remove("hidden");
     dataView.classList.add("hidden");
+
+    if (myChart) {
+      myChart.destroy();
+      myChart = null;
+    }
   });
 
   loadDesignList();
