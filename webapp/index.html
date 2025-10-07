@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,8 +6,10 @@
   <title>Digital Twin Dashboard</title>
   <style>
     body { font-family: sans-serif; padding: 2rem; }
-    pre { background: #f0f0f0; padding: 1rem; border-radius: 5px; }
+    pre { background: #f0f0f0; padding: 1rem; border-radius: 5px; white-space: pre-wrap; }
     .hidden { display: none; }
+    select { padding: 0.5rem; margin-right: 1rem; }
+    button { padding: 0.5rem 1rem; }
   </style>
 </head>
 <body>
@@ -16,13 +19,13 @@
 <div id="router">
   <div id="home">
     <h2>Choose Parametric Design</h2>
-    <label>
-      Enter ID:
-      <input type="number" id="designId" />
-    </label>
-    <button id="fetchBtn">Fetch Data</button>
     <p id="loading" class="hidden">Loading...</p>
     <p id="error" class="hidden" style="color:red"></p>
+
+    <select id="designSelect">
+      <option value="">-- Select a Design --</option>
+    </select>
+    <button id="fetchBtn" disabled>Fetch Data</button>
   </div>
 
   <div id="dataView" class="hidden">
@@ -32,20 +35,49 @@
   </div>
 </div>
 
-</body>
-</html>
 <script>
   const fetchBtn = document.getElementById("fetchBtn");
   const backBtn = document.getElementById("backBtn");
-  const designIdInput = document.getElementById("designId");
+  const designSelect = document.getElementById("designSelect");
   const loadingEl = document.getElementById("loading");
   const errorEl = document.getElementById("error");
   const dataView = document.getElementById("dataView");
   const homeView = document.getElementById("home");
   const dataOutput = document.getElementById("dataOutput");
 
+  async function loadDesignList() {
+    loadingEl.classList.remove("hidden");
+    errorEl.classList.add("hidden");
+
+    try {
+      const res = await fetch(`/api/tygron/parametric_designs`);
+      if (!res.ok) {
+        const text = await res.text();
+        throw new Error(`Failed to fetch list: ${res.status} - ${text}`);
+      }
+
+      const designs = await res.json();
+      console.log("Design list:", designs);
+
+      designs.forEach(d => {
+        const option = document.createElement("option");
+        option.value = d.id;
+        option.textContent = `${d.name} (ID: ${d.id})`;
+        designSelect.appendChild(option);
+      });
+
+      fetchBtn.disabled = false;
+    } catch (err) {
+      console.error(err);
+      errorEl.textContent = err.message;
+      errorEl.classList.remove("hidden");
+    } finally {
+      loadingEl.classList.add("hidden");
+    }
+  }
+
   fetchBtn.addEventListener("click", async () => {
-    const id = designIdInput.value;
+    const id = designSelect.value;
     if (!id) return;
 
     loadingEl.classList.remove("hidden");
@@ -53,18 +85,15 @@
     dataOutput.textContent = "";
 
     try {
-      const res = await fetch(`api/tygron/parametric_designs/${id}`);
-
+      const res = await fetch(`/api/tygron/parametric_designs/${id}`);
       if (!res.ok) {
-        const errorText = await res.text();
-        console.error("Fetch failed, got:", errorText);
-        throw new Error(`Fetch failed: ${res.status}`);
+        const text = await res.text();
+        throw new Error(`Fetch failed: ${res.status} - ${text}`);
       }
 
       const data = await res.json();
-      console.log("Received data:", data);
-
       dataOutput.textContent = JSON.stringify(data, null, 2);
+
       homeView.classList.add("hidden");
       dataView.classList.remove("hidden");
     } catch (err) {
@@ -79,4 +108,9 @@
     homeView.classList.remove("hidden");
     dataView.classList.add("hidden");
   });
+
+  loadDesignList();
 </script>
+
+</body>
+</html>

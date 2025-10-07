@@ -11,6 +11,8 @@ import reactor.core.publisher.Mono;
 @RequestMapping("/api/tygron")
 public class TygronController {
     private final TygronService tygronService;
+    private static final String TOKEN = "297cd11156jms9pG1XxHJAkPmU8Fo9WO";
+
 
     public TygronController(TygronService tygronService) {
         this.tygronService = tygronService;
@@ -18,8 +20,12 @@ public class TygronController {
 
     @GetMapping("/parametric_designs/{id}")
     public Mono<String> getParametricDesign(@PathVariable int id) {
-        String token = "297cd11156jms9pG1XxHJAkPmU8Fo9WO";
-        return tygronService.getParametricDesign(id, token);
+        return tygronService.getParametricDesign(id, TOKEN);
+    }
+
+    @GetMapping("/parametric_designs")
+    public Mono<String> getParametricDesigns() {
+        return tygronService.getAllParametricDesigns(TOKEN);
     }
 
 }

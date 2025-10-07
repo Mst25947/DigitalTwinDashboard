@@ -18,4 +18,11 @@ public class TygronService {
                 .retrieve()
                 .bodyToMono(String.class);
     }
+
+    public Mono<String> getAllParametricDesigns(String token) {
+        return webclient.get()
+                .uri("/api/session/items/parametric_designs/?f=JSON&token={token}", token)
+                .retrieve()
+                .bodyToMono(String.class);
+    }
 }
