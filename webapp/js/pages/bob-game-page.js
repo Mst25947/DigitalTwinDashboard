@@ -10,7 +10,7 @@ export class BobGamePage extends LitElement {
   `;
 
   render() {
-    return html`<h2>BOB-Game Page</h2>`;
+    return html`<iframe src="https://www.goedbeslissen.nl/" width="100%" height="800px" style="border:none;"></iframe>`;
   }
 }
 
