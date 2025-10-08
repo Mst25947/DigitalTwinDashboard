@@ -1,6 +1,6 @@
 import { LitElement, html, css } from "lit";
 
-export class BobGamePage extends LitElement {
+export class ResultatenPage extends LitElement {
   static styles = css`
     h2 {
       color: #2a2a2a;
@@ -10,8 +10,8 @@ export class BobGamePage extends LitElement {
   `;
 
   render() {
-    return html`<h2>Bob Game Page</h2>`;
+    return html`<h2>Resultaten Page</h2>`;
   }
 }
 
-customElements.define("bob-game-page", BobGamePage);
+customElements.define("resultaten-page", ResultatenPage);
