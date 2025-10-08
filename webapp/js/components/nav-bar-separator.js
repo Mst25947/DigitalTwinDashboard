@@ -3,10 +3,10 @@ import { LitElement, html, css } from "lit";
 export class NavBarSeparator extends LitElement {
   static styles = css`
     div {
-      width: 2px;             /* thickness of the line */
-      height: 20px;           /* height of the separator */
-      background-color: #aaa; /* color of the line */
-      border-radius: 2px;     /* smooth edges */
+      width: 2px;   
+      height: 20px;       
+      background-color: #000000; 
+      border-radius: 2px;    
     }
   `;
 

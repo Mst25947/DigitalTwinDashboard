@@ -5,6 +5,7 @@ export class NavBarItem extends LitElement {
   static properties = {
     label: { type: String },
     route: { type: String },
+    active: { type: Boolean }
   };
 
   static styles = css`
@@ -13,9 +14,15 @@ export class NavBarItem extends LitElement {
       cursor: pointer;
       border-radius: 8px;
       transition: background 0.2s;
+      font-size: 20px;
     }
+
+    div {
+        transition: transform 0.5s ease;
+    }
+
     div:hover {
-      background: #eef;
+      transform: scale(1.1); 
     }
   `;
 
@@ -30,4 +37,4 @@ export class NavBarItem extends LitElement {
   }
 }
 
-customElements.define("nav-bar-items", NavBarItem);
+customElements.define("nav-bar-navigational-items", NavBarItem);

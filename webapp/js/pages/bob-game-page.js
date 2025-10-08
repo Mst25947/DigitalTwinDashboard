@@ -10,7 +10,7 @@ export class BobGamePage extends LitElement {
   `;
 
   render() {
-    return html`<h2>Bob Game Page</h2>`;
+    return html`<h2>BOB-Game Page</h2>`;
   }
 }
 
