@@ -1,7 +1,6 @@
 import { LitElement, html, css } from "lit";
 import "./nav-bar-items.js";
 import "./nav-bar-separator.js";
-import { Router } from "@vaadin/router";
 
 export class NavBar extends LitElement {
   static styles = css`

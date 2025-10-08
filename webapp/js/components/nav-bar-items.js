@@ -19,12 +19,14 @@ export class NavBarItem extends LitElement {
     }
   `;
 
-  navigate() {
-    Router.go(this.route);
+  navigateTo(path) {
+    Router.go(path);
   }
 
   render() {
-    return html`<div @click=${this.navigate}>${this.label}</div>`;
+    return html`
+      <div @click=${() => this.navigateTo(this.route)}>${this.label}</div>
+    `;
   }
 }
 
