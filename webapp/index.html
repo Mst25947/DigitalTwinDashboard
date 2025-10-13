@@ -12,18 +12,18 @@
 
 <div id="router">
   <div id="home">
-    <h2>Choose Parametric Design</h2>
+    <h2>Kies Parametric Design</h2>
     <p id="loading" class="hidden" style="color:#007bff;">Loading...</p>
     <p id="error" class="hidden" style="color:red;"></p>
 
     <select id="designSelect">
       <option value="">-- Select a Design --</option>
     </select>
-    <button id="fetchBtn" disabled>Fetch Data</button>
+    <button id="fetchBtn" disabled>Fetch</button>
   </div>
 
   <div id="dataView" class="hidden">
-    <button id="backBtn" style="margin-bottom: 20px;">Back to Selection</button>
+    <button id="backBtn" style="margin-bottom: 20px;">Terug</button>
     <h2 id="designNameTitle" style="margin-bottom: 20px;">Data:</h2>
 
     <div id="dashboard-container">
@@ -60,9 +60,9 @@
             <div class="accordion-header" id="header-roads">Wegen & Trottoir <span class="arrow">></span></div>
             <div class="accordion-content" id="content-roads">
               <p>Wegen Fractie: <strong id="val-fraction-roads">--</strong></p>
-              <p>Weg Breedte: <strong id="val-road-width">--</strong> m</p>
-              <p>Trottoir Breedte: <strong id="val-sidewalk-width">--</strong> m</p>
-              <p>Weg Afstand Y-as: <strong id="val-road-distance-y">--</strong> m</p>
+              <p>Weg Breedte: <strong id="val-road-width">--</strong></p>
+              <p>Trottoir Breedte: <strong id="val-sidewalk-width">--</strong></p>
+              <p>Weg Afstand Y-as: <strong id="val-road-distance-y">--</strong></p>
             </div>
           </div>
 
@@ -70,7 +70,7 @@
             <div class="accordion-header" id="header-water">Water <span class="arrow">></span></div>
             <div class="accordion-content" id="content-water">
               <p>Water Fractie: <strong id="val-fraction-water">--</strong></p>
-              <p>Water Breedte: <strong id="val-water-width">--</strong> m</p>
+              <p>Water Breedte: <strong id="val-water-width">--</strong></p>
             </div>
           </div>
 
@@ -78,8 +78,8 @@
             <div class="accordion-header" id="header-parking">Parkeerplaatsen <span class="arrow">></span></div>
             <div class="accordion-content" id="content-parking">
               <p>Parkeer Fractie: <strong id="val-fraction-parking">--</strong></p>
-              <p>Parkeer Lengte: <strong id="val-parking-length">--</strong> m</p>
-              <p>Parkeer Breedte: <strong id="val-parking-width">--</strong> m</p>
+              <p>Parkeer Lengte: <strong id="val-parking-length">--</strong></p>
+              <p>Parkeer Breedte: <strong id="val-parking-width">--</strong></p>
             </div>
           </div>
 
@@ -108,7 +108,7 @@
       </div>
     </div>
 
-    <button id="toggleRawData" onclick="document.getElementById('dataOutput').classList.toggle('hidden');" style="margin-top: 20px; background-color: #6c757d;">Toon/Verberg Ruwe Data</button>
+    <button id="toggleRawData" onclick="document.getElementById('dataOutput').classList.toggle('hidden');" style="margin-top: 20px; background-color: #6c757d;">Json Data</button>
     <pre id="dataOutput" class="hidden"></pre>
   </div>
 </div>
