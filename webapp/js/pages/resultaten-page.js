@@ -1,4 +1,5 @@
 import { LitElement, html, css } from "lit";
+import { initDashboard } from "../../js/dashboard/dashboard.js";
 
 export class ResultatenPage extends LitElement {
   static styles = css`
@@ -102,124 +103,100 @@ export class ResultatenPage extends LitElement {
     }
   `;
 
+  firstUpdated() {
+    initDashboard(this.shadowRoot);
+  }
+
   render() {
     return html`
-      <head>
-        <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
-        <meta charset="UTF-8">
-        <title>Digital Twin Dashboard</title>
-        <link rel="stylesheet" href="./css/dashboard.css">
-      </head>
-      <body>
-
       <h1>Digital Twin Dashboard</h1>
 
-      <div id="router">
-        <div id="home">
-          <h2>Kies Parametric Design</h2>
-          <p id="loading" class="hidden" style="color:#007bff;">Loading...</p>
-          <p id="error" class="hidden" style="color:red;"></p>
+      <h2 id="designNameTitle" style="margin-bottom: 20px;">Data:</h2>
 
-          <select id="designSelect">
-            <option value="">-- Select a Design --</option>
-          </select>
-          <button id="fetchBtn" disabled>Fetch</button>
-        </div>
+      <div id="dashboard-container">
 
-        <div id="dataView" class="hidden">
-          <button id="backBtn" style="margin-bottom: 20px;">Terug</button>
-          <h2 id="designNameTitle" style="margin-bottom: 20px;">Data:</h2>
+        <div id="sidebar">
 
-          <div id="dashboard-container">
-
-            <div id="sidebar">
-
-              <div id="kpi-cards">
-                <div class="kpi-card">
-                  <h4>Bebouwing (Fractie)</h4>
-                  <p id="kpi-building" style="color: #a55eea;">--</p>
-                </div>
-                <div class="kpi-card">
-                  <h4>Groen & Water (Totaal)</h4>
-                  <p id="kpi-green-water" style="color: #2ecc71;">--</p>
-                </div>
-                <div class="kpi-card">
-                  <h4>Vloeroppervlakte (Totaal)</h4>
-                  <p id="kpi-area" style="color: #e74c3c;">--</p>
-                </div>
-              </div>
-
-              <h3>Details</h3>
-              <div id="accordion">
-
-                <div class="accordion-item">
-                  <div class="accordion-header" id="header-public-green">Publiek Groen & Tuinen <span class="arrow">></span></div>
-                  <div class="accordion-content" id="content-public-green">
-                    <p>Publiek Groen Fractie: <strong id="val-fraction-public-green">--</strong></p>
-                    <p>Tuin Fractie: <strong id="val-fraction-gardens">--</strong></p>
-                  </div>
-                </div>
-
-                <div class="accordion-item">
-                  <div class="accordion-header" id="header-roads">Wegen & Trottoir <span class="arrow">></span></div>
-                  <div class="accordion-content" id="content-roads">
-                    <p>Wegen Fractie: <strong id="val-fraction-roads">--</strong></p>
-                    <p>Weg Breedte: <strong id="val-road-width">--</strong></p>
-                    <p>Trottoir Breedte: <strong id="val-sidewalk-width">--</strong></p>
-                    <p>Weg Afstand Y-as: <strong id="val-road-distance-y">--</strong></p>
-                  </div>
-                </div>
-
-                <div class="accordion-item">
-                  <div class="accordion-header" id="header-water">Water <span class="arrow">></span></div>
-                  <div class="accordion-content" id="content-water">
-                    <p>Water Fractie: <strong id="val-fraction-water">--</strong></p>
-                    <p>Water Breedte: <strong id="val-water-width">--</strong></p>
-                  </div>
-                </div>
-
-                <div class="accordion-item">
-                  <div class="accordion-header" id="header-parking">Parkeerplaatsen <span class="arrow">></span></div>
-                  <div class="accordion-content" id="content-parking">
-                    <p>Parkeer Fractie: <strong id="val-fraction-parking">--</strong></p>
-                    <p>Parkeer Lengte: <strong id="val-parking-length">--</strong></p>
-                    <p>Parkeer Breedte: <strong id="val-parking-width">--</strong></p>
-                  </div>
-                </div>
-
-                <div class="accordion-item">
-                  <div class="accordion-header" id="header-building-details">Gebouw & Kavel Details <span class="arrow">></span></div>
-                  <div class="accordion-content" id="content-building-details">
-                    <p>Kavel 1: Totale vloeropp.: <strong id="val-total-area-1">--</strong> m²</p>
-                    <p>Kavel 2: Totale vloeropp.: <strong id="val-total-area-2">--</strong> m²</p>
-                    <p>Kavel 1: Aantal verdiepingen: <strong id="val-building-floors-1">--</strong></p>
-                    <p>Kavel 2: Aantal verdiepingen: <strong id="val-building-floors-2">--</strong></p>
-                    <p>Afstand tot weg: <strong id="val-building-road-distance">--</strong> m</p>
-                    <p>Achtertuin afstand: <strong id="val-backyard-distance">--</strong> m</p>
-                    <p>Fit Fractie (Kavel 1): <strong id="val-fit-fraction-1">--</strong></p>
-                    <p>Fit Fractie (Kavel 2): <strong id="val-fit-fraction-2">--</strong></p>
-                  </div>
-                </div>
-
-              </div>
+          <div id="kpi-cards">
+            <div class="kpi-card">
+              <h4>Bebouwing (Fractie)</h4>
+              <p id="kpi-building" style="color: #a55eea;">--</p>
             </div>
-
-            <div id="main-content">
-              <h3>Resultaten: Grondgebruik Verhoudingen</h3>
-              <div style="max-width: 500px; margin: 0 auto;">
-                <canvas id="landUseChart"></canvas>
-              </div>
+            <div class="kpi-card">
+              <h4>Groen & Water (Totaal)</h4>
+              <p id="kpi-green-water" style="color: #2ecc71;">--</p>
+            </div>
+            <div class="kpi-card">
+              <h4>Vloeroppervlakte (Totaal)</h4>
+              <p id="kpi-area" style="color: #e74c3c;">--</p>
             </div>
           </div>
 
-          <button id="toggleRawData" onclick="document.getElementById('dataOutput').classList.toggle('hidden');" style="margin-top: 20px; background-color: #6c757d;">Json Data</button>
-          <pre id="dataOutput" class="hidden"></pre>
+          <h3>Details</h3>
+          <div id="accordion">
+
+            <div class="accordion-item">
+              <div class="accordion-header" id="header-public-green">Publiek Groen & Tuinen <span class="arrow">></span></div>
+              <div class="accordion-content" id="content-public-green">
+                <p>Publiek Groen Fractie: <strong id="val-fraction-public-green">--</strong></p>
+                <p>Tuin Fractie: <strong id="val-fraction-gardens">--</strong></p>
+              </div>
+            </div>
+
+            <div class="accordion-item">
+              <div class="accordion-header" id="header-roads">Wegen & Trottoir <span class="arrow">></span></div>
+              <div class="accordion-content" id="content-roads">
+                <p>Wegen Fractie: <strong id="val-fraction-roads">--</strong></p>
+                <p>Weg Breedte: <strong id="val-road-width">--</strong></p>
+                <p>Trottoir Breedte: <strong id="val-sidewalk-width">--</strong></p>
+                <p>Weg Afstand Y-as: <strong id="val-road-distance-y">--</strong></p>
+              </div>
+            </div>
+
+            <div class="accordion-item">
+              <div class="accordion-header" id="header-water">Water <span class="arrow">></span></div>
+              <div class="accordion-content" id="content-water">
+                <p>Water Fractie: <strong id="val-fraction-water">--</strong></p>
+                <p>Water Breedte: <strong id="val-water-width">--</strong></p>
+              </div>
+            </div>
+
+            <div class="accordion-item">
+              <div class="accordion-header" id="header-parking">Parkeerplaatsen <span class="arrow">></span></div>
+              <div class="accordion-content" id="content-parking">
+                <p>Parkeer Fractie: <strong id="val-fraction-parking">--</strong></p>
+                <p>Parkeer Lengte: <strong id="val-parking-length">--</strong></p>
+                <p>Parkeer Breedte: <strong id="val-parking-width">--</strong></p>
+              </div>
+            </div>
+
+            <div class="accordion-item">
+              <div class="accordion-header" id="header-building-details">Gebouw & Kavel Details <span class="arrow">></span></div>
+              <div class="accordion-content" id="content-building-details">
+                <p>Kavel 1: Totale vloeropp.: <strong id="val-total-area-1">--</strong> m²</p>
+                <p>Kavel 2: Totale vloeropp.: <strong id="val-total-area-2">--</strong> m²</p>
+                <p>Kavel 1: Aantal verdiepingen: <strong id="val-building-floors-1">--</strong></p>
+                <p>Kavel 2: Aantal verdiepingen: <strong id="val-building-floors-2">--</strong></p>
+                <p>Afstand tot weg: <strong id="val-building-road-distance">--</strong> m</p>
+                <p>Achtertuin afstand: <strong id="val-backyard-distance">--</strong> m</p>
+                <p>Fit Fractie (Kavel 1): <strong id="val-fit-fraction-1">--</strong></p>
+                <p>Fit Fractie (Kavel 2): <strong id="val-fit-fraction-2">--</strong></p>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <div id="main-content">
+          <h3>Resultaten: Grondgebruik Verhoudingen</h3>
+          <div style="max-width: 500px; margin: 0 auto;">
+            <canvas id="landUseChart"></canvas>
+          </div>
         </div>
       </div>
 
-      <script src="./js/dashboard/dashboard.js"></script>
-
-      </body>
+      <button id="toggleRawData" onclick="document.getElementById('dataOutput').classList.toggle('hidden');" style="margin-top: 20px; background-color: #6c757d;">Json Data</button>
+      <pre id="dataOutput" class="hidden"></pre>
     `;
   }
 }
