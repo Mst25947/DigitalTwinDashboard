@@ -1,19 +1,21 @@
 import Chart from "chart.js/auto";
 
-
 export function initDashboard(root) {
     const get = (id) => root.getElementById(id);
 
-    const fetchBtn = get("fetchBtn");
-    const backBtn = get("backBtn");
-    const designSelect = get("designSelect");
-    const loadingEl = get("loading");
-    const errorEl = get("error");
-    const dataView = get("dataView");
-    const homeView = get("home");
-    const dataOutput = get("dataOutput");
-    const designNameTitle = get("designNameTitle");
-    const landUseChartCanvas = get("landUseChart");
+    const tokenInput = get("tokenInput");
+
+    const defaultDesignId = 13;
+    const useDummy = false;
+
+    const savedToken = localStorage.getItem('tygronToken');
+    if (savedToken) {
+        if (tokenInput) {
+            tokenInput.value = savedToken;
+        }
+        console.log("Opgeslagen token gevonden:", savedToken);
+        loadDashboard(savedToken);
+    }
 
     let myChart = null;
 
@@ -51,6 +53,7 @@ export function initDashboard(root) {
         return totalArea;
     };
 
+
     function updateKPIs(data) {
         const attr = data.attributes || {};
         const buildingFraction = (getAttrValue(attr, "FRACTION_BUILDINGS") * 100).toFixed(1);
@@ -80,9 +83,12 @@ export function initDashboard(root) {
             getAttrValue(attr, "FRACTION_REMAINDER"),
         ];
 
+        const chartCanvas = get("landUseChart");
+        if (!chartCanvas) return;
+
         if (myChart) myChart.destroy();
 
-        myChart = new Chart(landUseChartCanvas, {
+        myChart = new Chart(chartCanvas, {
             type: "pie",
             data: {
                 labels,
@@ -144,15 +150,12 @@ export function initDashboard(root) {
 
         get("val-fraction-public-green").textContent = showFraction("FRACTION_PUBLIC_GREEN");
         get("val-fraction-gardens").textContent = showFraction("FRACTION_GARDENS");
-
         get("val-fraction-roads").textContent = showFraction("FRACTION_ROADS");
         get("val-road-width").textContent = showAttr("ROAD_WIDTH_M", 0, " m");
         get("val-sidewalk-width").textContent = showAttr("SIDEWALK_WIDTH_M", 0, " m");
         get("val-road-distance-y").textContent = showAttr("ROAD_DISTANCE_Y_M", 0, " m");
-
         get("val-fraction-water").textContent = showFraction("FRACTION_WATER");
         get("val-water-width").textContent = showAttr("WATER_WIDTH_M", 0, " m");
-
         get("val-fraction-parking").textContent = showFraction("FRACTION_PARKING");
         get("val-parking-length").textContent = showAttr("PARKING_LENGTH_M", 0, " m");
         get("val-parking-width").textContent = showAttr("PARKING_WIDTH_M", 0, " m");
@@ -179,7 +182,7 @@ export function initDashboard(root) {
         updateFractionDisplay("val-fit-fraction-2", plotAttr2);
     }
 
-    //Dummy data
+    // Dummy data
     const dummyData = {
         name: "Max shizzel (Dummy)",
         attributes: {
@@ -197,10 +200,35 @@ export function initDashboard(root) {
         ],
     };
 
-    const defaultDesignId = 10;
-    const useDummy = false;
+    const fetchBtn = get("fetchBtn");
+    if (fetchBtn) {
+        fetchBtn.addEventListener('click', () => {
+            const userToken = tokenInput.value.trim();
+            if (userToken) {
+                localStorage.setItem('tygronToken', userToken)
+                loadDashboard(userToken);
+            } else {
+                alert("Voer eerst de Tygron Token in.");
+            }
+        });
+    }
 
-    (async () => {
+    async function loadDashboard(userToken) {
+        const currentLoadingEl = get("loading");
+        const currentErrorEl = get("error");
+        const currentDisplayToken = get("displayToken");
+
+        if (currentLoadingEl) {
+            currentLoadingEl.style.display = 'block';
+        }
+        if (currentErrorEl) {
+            currentErrorEl.style.display = 'none';
+        }
+
+        if (currentDisplayToken) {
+            currentDisplayToken.textContent = userToken;
+        }
+
         let data;
 
         if (useDummy) {
@@ -209,19 +237,45 @@ export function initDashboard(root) {
         } else {
             console.log("Ophalen van design ID:", defaultDesignId);
             try {
-                const res = await fetch(`/api/tygron/parametric_designs/${defaultDesignId}`);
+                const headers = new Headers();
+                headers.append('X-Tygron-Token', userToken);
+
+                const res = await fetch(`/api/tygron/parametric_designs/${defaultDesignId}`, { headers });
+
                 if (!res.ok) throw new Error(`Fetch mislukt: ${res.status}`);
                 data = await res.json();
             } catch (err) {
-                console.warn("Kon data niet ophalen, val terug op dummy:", err);
-                data = dummyData;
+                console.error("Fout bij ophalen van data:", err);
+
+                if (currentErrorEl) {
+                    currentErrorEl.textContent = `Fout: ${err.message}. Controleer de ingevoerde token.`;
+                    currentErrorEl.style.display = 'block';
+                }
+                if (currentLoadingEl) {
+                    currentLoadingEl.style.display = 'none';
+                }
+
+                localStorage.removeItem('tygronToken');
+                if (tokenInput) {
+                    tokenInput.value = '';
+                }
+                // ---------------------------------
+
+                return;
             }
         }
 
-        // 👇 Dashboard vullen
-        dataOutput.textContent = JSON.stringify(data, null, 2);
+        if (currentLoadingEl) {
+            currentLoadingEl.style.display = 'none';
+        }
+
+        const currentDataOutput = get("dataOutput");
+        if (currentDataOutput) {
+            currentDataOutput.textContent = JSON.stringify(data, null, 2);
+        }
+
         updateKPIs(data);
         createChart(data);
         updateAccordionContent(data);
-    })();
+    };
 }
