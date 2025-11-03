@@ -111,13 +111,20 @@ export class ResultatenPage extends LitElement {
     return html`
       <h1>Digital Twin Dashboard</h1>
 
-      <h2 id="designNameTitle" style="margin-bottom: 20px;">Data:</h2>
+      <h2 style="margin-bottom: 20px;">
+        Gebruikte API code:
+        <span id="displayToken" style="font-weight: normal; color: #dc3545; font-size: 0.8em;">(Nog niet geladen)</span>
+      </h2>
 
       <div id="dashboard-container">
 
         <div id="sidebar">
-
+          <input type="text" id="tokenInput" placeholder="Voer Tygron Token hier in">
+          <button id="fetchBtn">Laad Ontwerp</button>
+          <div id="loading" style="display: none; padding: 10px; text-align: center; color: #007bff; font-weight: bold;">Bezig met laden...</div>
+          <div id="error" style="display: none; padding: 10px; text-align: center; color: #dc3545; font-weight: bold; border: 1px solid #dc3545; border-radius: 5px; margin-top: 10px;"></div>
           <div id="kpi-cards">
+            
             <div class="kpi-card">
               <h4>Bebouwing (Fractie)</h4>
               <p id="kpi-building" style="color: #a55eea;">--</p>
@@ -194,9 +201,6 @@ export class ResultatenPage extends LitElement {
           </div>
         </div>
       </div>
-
-      <button id="toggleRawData" onclick="document.getElementById('dataOutput').classList.toggle('hidden');" style="margin-top: 20px; background-color: #6c757d;">Json Data</button>
-      <pre id="dataOutput" class="hidden"></pre>
     `;
   }
 }
