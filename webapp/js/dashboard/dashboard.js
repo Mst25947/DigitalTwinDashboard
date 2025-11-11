@@ -5,7 +5,7 @@ export function initDashboard(root) {
 
     const tokenInput = get("tokenInput");
 
-    const defaultDesignId = 13;
+    const defaultDesignId = 14;
     const useDummy = false;
 
     const savedToken = localStorage.getItem('tygronToken');
