@@ -31,6 +31,15 @@ export default {
         outDir: "../src/main/resources/static/",
     },
     root: "webapp",
+ // Uitsluiten van Unity bestanden van Vite's parsing
+    assetsInclude: [
+        '**/*.br',
+        '**/*.data',
+        '**/*.wasm',
+    ],
+
+    publicDir: 'js/pages/TestBuild',
+
     plugins: [rewriteToDashboard()],
     server: {
         proxy: {
