@@ -25,7 +25,7 @@ export default {
     build: {
         rollupOptions: {
             input: {
-                dashboard: resolve(__dirname, "webapp", "dashboard", "index.html"),
+                dashboard: resolve(__dirname, "webapp", "index.html"),
             },
         },
         outDir: "../src/main/resources/static/",
