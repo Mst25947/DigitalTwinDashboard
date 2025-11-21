@@ -15,7 +15,7 @@ class UnityGamePage extends LitElement{
                 }
             </style>
         <div>
-            <iframe src="/index.html"></iframe>
+            <iframe src="/bobgame.html"></iframe>
         </div>
         `
     }
