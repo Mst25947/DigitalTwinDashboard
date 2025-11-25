@@ -101,6 +101,13 @@ export class ResultatenPage extends LitElement {
     .accordion-content strong {
       color: #333;
     }
+    #excelBtn {
+      background-color: #217346; 
+      margin-left: 10px;
+    }
+    #excelBtn:hover {
+      background-color: #1e6b41;
+    }
   `;
 
   firstUpdated() {
@@ -120,7 +127,9 @@ export class ResultatenPage extends LitElement {
 
         <div id="sidebar">
           <input type="text" id="tokenInput" placeholder="Voer Tygron Token hier in">
+          <br>
           <button id="fetchBtn">Laad Ontwerp</button>
+          <button id="excelBtn">Export Excel</button>
           <div id="loading" style="display: none; padding: 10px; text-align: center; color: #007bff; font-weight: bold;">Bezig met laden...</div>
           <div id="error" style="display: none; padding: 10px; text-align: center; color: #dc3545; font-weight: bold; border: 1px solid #dc3545; border-radius: 5px; margin-top: 10px;"></div>
           <div id="kpi-cards">
