@@ -1,7 +1,8 @@
 import Chart from "chart.js/auto";
 import * as XLSX from "xlsx";
-
 export function initDashboard(root) {
+    console.log("Hoi")
+
     const get = (id) => root.getElementById(id);
 
     const tokenInput = get("tokenInput");
