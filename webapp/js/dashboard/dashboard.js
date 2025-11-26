@@ -1,4 +1,5 @@
 import Chart from "chart.js/auto";
+import * as XLSX from "xlsx";
 
 export function initDashboard(root) {
     const get = (id) => root.getElementById(id);
@@ -18,6 +19,98 @@ export function initDashboard(root) {
     }
 
     let myChart = null;
+
+    const excelBtn = get("excelBtn");
+
+    if (excelBtn) {
+        excelBtn.addEventListener("click", () => {
+            generateExcel();
+        });
+    }
+
+    function generateExcel() {
+        // Check of er data is
+        const kpiValue = get("kpi-building").textContent;
+        if (kpiValue === "--" || !myChart) {
+            alert("Laad eerst data in voordat je exporteert.");
+            return;
+        }
+
+        // We bouwen een 'Array of Arrays'. Elke sub-array is een rij in Excel.
+        const summaryData = [
+            ["RAPPORTAGE DIGITAL TWIN ONTWERP"],
+            ["Datum", new Date().toLocaleDateString("nl-NL")],
+            [""],
+            ["KPI SAMENVATTING"],
+            ["Omschrijving", "Waarde"],
+            ["Bebouwing (Fractie)", get("kpi-building").textContent],
+            ["Groen & Water (Totaal)", get("kpi-green-water").textContent],
+            ["Vloeroppervlakte (Totaal)", get("kpi-area").textContent],
+            [""],
+            ["GRONDGEBRUIK VERDELING (Grafiek Data)"],
+            ["Categorie", "Percentage"]
+        ];
+
+        const chartLabels = myChart.data.labels;
+        const chartValues = myChart.data.datasets[0].data;
+
+        chartLabels.forEach((label, index) => {
+            // Zet decimalen om naar percentages voor leesbaarheid in Excel
+            const percentage = (chartValues[index] * 100).toFixed(1) + "%";
+            summaryData.push([label, percentage]);
+        });
+
+        // Hier halen we alles op wat in de accordeons staat
+        const detailData = [
+            ["DETAIL RAPPORTAGE"],
+            [""],
+            ["CATEGORIE: GROEN & TUINEN"],
+            ["Publiek Groen Fractie", get("val-fraction-public-green").textContent],
+            ["Tuin Fractie", get("val-fraction-gardens").textContent],
+            [""],
+            ["CATEGORIE: INFRASTRUCTUUR"],
+            ["Wegen Fractie", get("val-fraction-roads").textContent],
+            ["Weg Breedte", get("val-road-width").textContent],
+            ["Trottoir Breedte", get("val-sidewalk-width").textContent],
+            ["Afstand Y-as", get("val-road-distance-y").textContent],
+            [""],
+            ["CATEGORIE: WATER"],
+            ["Water Fractie", get("val-fraction-water").textContent],
+            ["Water Breedte", get("val-water-width").textContent],
+            [""],
+            ["CATEGORIE: PARKEREN"],
+            ["Parkeer Fractie", get("val-fraction-parking").textContent],
+            ["Parkeer Lengte", get("val-parking-length").textContent],
+            ["Parkeer Breedte", get("val-parking-width").textContent],
+            [""],
+            ["CATEGORIE: GEBOUWEN & KAVELS"],
+            ["Kavel 1 Vloeroppervlakte", get("val-total-area-1").textContent],
+            ["Kavel 2 Vloeroppervlakte", get("val-total-area-2").textContent],
+            ["Kavel 1 Verdiepingen", get("val-building-floors-1").textContent],
+            ["Kavel 2 Verdiepingen", get("val-building-floors-2").textContent],
+            ["Afstand tot weg", get("val-building-road-distance").textContent],
+            ["Fit Fractie Kavel 1", get("val-fit-fraction-1").textContent],
+            ["Fit Fractie Kavel 2", get("val-fit-fraction-2").textContent],
+        ];
+
+
+        // Maak een nieuw werkboek
+        const wb = XLSX.utils.book_new();
+
+        // Maak sheet 1 (Samenvatting)
+        const wsSummary = XLSX.utils.aoa_to_sheet(summaryData);
+        wsSummary['!cols'] = [{ wch: 30 }, { wch: 15 }];
+
+        // Maak sheet 2 (Details)
+        const wsDetails = XLSX.utils.aoa_to_sheet(detailData);
+        wsDetails['!cols'] = [{ wch: 30 }, { wch: 15 }];
+
+        // Voeg sheets toe aan werkboek
+        XLSX.utils.book_append_sheet(wb, wsSummary, "Samenvatting");
+        XLSX.utils.book_append_sheet(wb, wsDetails, "Details");
+
+        XLSX.writeFile(wb, "Tygron_Resultaten.xlsx");
+    }
 
     const accordionHeaders = root.querySelectorAll(".accordion-header");
     accordionHeaders.forEach((header) => {
