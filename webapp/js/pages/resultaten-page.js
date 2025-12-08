@@ -3,111 +3,120 @@ import { initDashboard } from "../../js/dashboard/dashboard.js";
 
 export class ResultatenPage extends LitElement {
   static styles = css`
-    /* Algemene stijlen */
-    body { font-family: sans-serif; padding: 2rem; background-color: #f7f9fc; }
-    pre { background: #e9ecef; padding: 1rem; border-radius: 5px; white-space: pre-wrap; overflow-x: auto; }
-    .hidden { display: none !important; }
-    select { padding: 0.5rem; margin-right: 1rem; border-radius: 5px; border: 1px solid #ced4da; }
-    button { padding: 0.5rem 1rem; border: none; border-radius: 5px; background-color: #007bff; color: white; cursor: pointer; transition: background-color 0.2s; }
-    button:hover { background-color: #0056b3; }
-
-    /* DASHBOARD LAYOUT */
-    #dashboard-container {
-      display: flex;
-      gap: 20px;
-      margin-top: 20px;
+    :host {
+      display: block;
+      height: 100vh;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
 
-    #sidebar {
-      flex: 0 0 300px;
-      background-color: white;
-      padding: 15px;
-      border-radius: 12px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    }
-
-    #main-content {
-      flex-grow: 1;
-      background-color: white;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    }
-
-    /* KPI Stijlen */
-    #kpi-cards { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
-    .kpi-card {
-      padding: 15px;
-      border: 1px solid #e0e0e0;
-      border-radius: 8px;
-      text-align: center;
-      background-color: #fff;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    }
-    .kpi-card h4 { margin: 0 0 5px 0; font-size: 0.9em; color: #6c757d; }
-    .kpi-card p { font-size: 1.8em; font-weight: bold; margin: 0; }
-
-    /* Accordeon Stijlen */
-    .accordion-item {
-      border: 1px solid #e0e0e0;
-      border-radius: 8px;
-      margin-bottom: 10px;
-      overflow: hidden;
-    }
-
-    .accordion-header {
-      background-color: #f8f9fa;
-      padding: 15px;
-      cursor: pointer;
+    /* HEADER */
+    header {
+      background-color: #dcdcdc;
+      padding: 10px 20px;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      border-bottom: 3px solid #fff;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .brand {
+      font-size: 1.2rem;
       font-weight: bold;
-      color: #34495e;
-      transition: background-color 0.2s;
+      color: #333;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .controls {
+      background: white;
+      padding: 10px 20px;
+      display: flex;
+      gap: 10px;
+      border-bottom: 1px solid #ccc;
     }
 
-    .accordion-header:hover {
-      background-color: #e9ecef;
+    input { padding: 5px; border: 1px solid #ccc; border-radius: 4px; }
+    button {
+      padding: 6px 12px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    #fetchBtn { background-color: #333; color: white; }
+    #excelBtn { background-color: #217346; color: white; }
+
+    /* GRID LAYOUT */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr; /* Twee gelijke kolommen */
+      grid-template-rows: auto auto;
+      gap: 20px;
+      padding: 20px;
+      max-width: 1400px;
+      margin: 0 auto;
     }
 
-    .accordion-header .arrow {
-      transition: transform 0.3s ease;
-      font-size: 1.2em;
+    /* CARDS */
+    .card {
+      background: white;
+      border-radius: 8px; /* Iets rondere hoeken */
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
     }
 
-    .accordion-header.active .arrow {
-      transform: rotate(90deg);
-    }
-
-    .accordion-content {
-      padding: 0 15px;
-      max-height: 0;
-      overflow: hidden;
-      transition: max-height 0.3s ease-out, padding 0.3s ease-out;
-      background-color: #ffffff;
-    }
-
-    .accordion-content.open {
-      max-height: 300px;
-      padding: 15px;
-    }
-
-    .accordion-content p {
+    .card-title {
+      font-size: 1.5rem;
+      font-weight: bold;
+      text-align: center;
       margin-bottom: 5px;
-      font-size: 0.9em;
-      color: #555;
+      color: #000;
     }
-    .accordion-content strong {
+
+    .card-subtitle {
+      text-align: center;
+      font-size: 0.8rem;
+      color: #666;
+      margin-bottom: 20px;
+    }
+
+    /* TABLE LAYOUT (BOB-INPUT) */
+    .data-table {
+      width: 100%;
+      font-size: 1rem;
+      font-weight: 600;
       color: #333;
     }
-    #excelBtn {
-      background-color: #217346; 
-      margin-left: 10px;
+
+    .data-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid #f0f0f0;
     }
-    #excelBtn:hover {
-      background-color: #1e6b41;
+
+    .data-row:last-child { border-bottom: none; }
+    .data-label { text-align: left; }
+    .data-value { text-align: right; font-weight: bold; }
+
+    /* CHART SECTION */
+    .chart-container {
+      grid-column: 1 / -1; 
+      max-width: 600px; 
     }
+
+    /* RIGHT COLUMN (Placeholder BGR) */
+    .bgr-content {
+      margin-top: 20px;
+      font-weight: bold;
+    }
+
+    .loading-msg { color: #007bff; font-weight: bold; margin-left: 10px; display: none; }
   `;
 
   firstUpdated() {
@@ -116,99 +125,72 @@ export class ResultatenPage extends LitElement {
 
   render() {
     return html`
-      <h1>Digital Twin Dashboard</h1>
 
-      <h2 style="margin-bottom: 20px;">
-        Gebruikte API code:
-        <span id="displayToken" style="font-weight: normal; color: #dc3545; font-size: 0.8em;">(Nog niet geladen)</span>
-      </h2>
 
-      <div id="dashboard-container">
+      <div class="controls">
+        <input type="text" id="tokenInput" placeholder="Tygron Token">
+        <button id="fetchBtn">Laad Ontwerp</button>
+        <button id="excelBtn">Export Excel</button>
+        <span id="loading" class="loading-msg">Laden...</span>
+        <span id="displayToken" style="font-size: 0.8em; color: #999; margin-left: auto;"></span>
+      </div>
 
-        <div id="sidebar">
-          <input type="text" id="tokenInput" placeholder="Voer Tygron Token hier in">
-          <br>
-          <button id="fetchBtn">Laad Ontwerp</button>
-          <button id="excelBtn">Export Excel</button>
-          <div id="loading" style="display: none; padding: 10px; text-align: center; color: #007bff; font-weight: bold;">Bezig met laden...</div>
-          <div id="error" style="display: none; padding: 10px; text-align: center; color: #dc3545; font-weight: bold; border: 1px solid #dc3545; border-radius: 5px; margin-top: 10px;"></div>
-          <div id="kpi-cards">
-            
-            <div class="kpi-card">
-              <h4>Bebouwing (Fractie)</h4>
-              <p id="kpi-building" style="color: #a55eea;">--</p>
-            </div>
-            <div class="kpi-card">
-              <h4>Groen & Water (Totaal)</h4>
-              <p id="kpi-green-water" style="color: #2ecc71;">--</p>
-            </div>
-            <div class="kpi-card">
-              <h4>Vloeroppervlakte (Totaal)</h4>
-              <p id="kpi-area" style="color: #e74c3c;">--</p>
-            </div>
-          </div>
+      <div class="dashboard-grid">
 
-          <h3>Details</h3>
-          <div id="accordion">
+        <div class="card">
+          <div class="card-title">BOB-Input</div>
+          <div class="card-subtitle">Huidige verdeling van het ontwerp</div>
 
-            <div class="accordion-item">
-              <div class="accordion-header" id="header-public-green">Publiek Groen & Tuinen <span class="arrow">></span></div>
-              <div class="accordion-content" id="content-public-green">
-                <p>Publiek Groen Fractie: <strong id="val-fraction-public-green">--</strong></p>
-                <p>Tuin Fractie: <strong id="val-fraction-gardens">--</strong></p>
-              </div>
+          <div class="data-table">
+            <div class="data-row" style="font-size: 0.9em; color: #666; margin-bottom: 10px;">
+              <span></span>
+              <span>Gemiddeld:</span>
             </div>
 
-            <div class="accordion-item">
-              <div class="accordion-header" id="header-roads">Wegen & Trottoir <span class="arrow">></span></div>
-              <div class="accordion-content" id="content-roads">
-                <p>Wegen Fractie: <strong id="val-fraction-roads">--</strong></p>
-                <p>Weg Breedte: <strong id="val-road-width">--</strong></p>
-                <p>Trottoir Breedte: <strong id="val-sidewalk-width">--</strong></p>
-                <p>Weg Afstand Y-as: <strong id="val-road-distance-y">--</strong></p>
-              </div>
+            <div class="data-row">
+              <span class="data-label">Straat & Stoep:</span>
+              <span class="data-value" id="val-roads">--</span>
             </div>
-
-            <div class="accordion-item">
-              <div class="accordion-header" id="header-water">Water <span class="arrow">></span></div>
-              <div class="accordion-content" id="content-water">
-                <p>Water Fractie: <strong id="val-fraction-water">--</strong></p>
-                <p>Water Breedte: <strong id="val-water-width">--</strong></p>
-              </div>
+            <div class="data-row">
+              <span class="data-label">Wooneenheden:</span>
+              <span class="data-value" id="val-buildings">--</span>
             </div>
-
-            <div class="accordion-item">
-              <div class="accordion-header" id="header-parking">Parkeerplaatsen <span class="arrow">></span></div>
-              <div class="accordion-content" id="content-parking">
-                <p>Parkeer Fractie: <strong id="val-fraction-parking">--</strong></p>
-                <p>Parkeer Lengte: <strong id="val-parking-length">--</strong></p>
-                <p>Parkeer Breedte: <strong id="val-parking-width">--</strong></p>
-              </div>
+            <div class="data-row">
+              <span class="data-label">Parkeren:</span>
+              <span class="data-value" id="val-parking">--</span>
             </div>
-
-            <div class="accordion-item">
-              <div class="accordion-header" id="header-building-details">Gebouw & Kavel Details <span class="arrow">></span></div>
-              <div class="accordion-content" id="content-building-details">
-                <p>Kavel 1: Totale vloeropp.: <strong id="val-total-area-1">--</strong> m²</p>
-                <p>Kavel 2: Totale vloeropp.: <strong id="val-total-area-2">--</strong> m²</p>
-                <p>Kavel 1: Aantal verdiepingen: <strong id="val-building-floors-1">--</strong></p>
-                <p>Kavel 2: Aantal verdiepingen: <strong id="val-building-floors-2">--</strong></p>
-                <p>Afstand tot weg: <strong id="val-building-road-distance">--</strong> m</p>
-                <p>Achtertuin afstand: <strong id="val-backyard-distance">--</strong> m</p>
-                <p>Fit Fractie (Kavel 1): <strong id="val-fit-fraction-1">--</strong></p>
-                <p>Fit Fractie (Kavel 2): <strong id="val-fit-fraction-2">--</strong></p>
-              </div>
+            <div class="data-row">
+              <span class="data-label">Tuin prive:</span>
+              <span class="data-value" id="val-gardens">--</span>
             </div>
-
+            <div class="data-row">
+              <span class="data-label">Groen publiek:</span>
+              <span class="data-value" id="val-public-green">--</span>
+            </div>
           </div>
         </div>
 
-        <div id="main-content">
-          <h3>Resultaten: Grondgebruik Verhoudingen</h3>
-          <div style="max-width: 500px; margin: 0 auto;">
+        <div class="card">
+          <div class="card-title">BOB-BGR</div>
+          <div class="card-subtitle">Doelstellingen en Budget</div>
+
+          <div class="bgr-content">
+            <div style="margin-bottom: 10px;">% Doel: <span style="font-weight: normal;">--</span></div>
+            <div style="margin-bottom: 10px;">% Budget: <span style="font-weight: normal;">--</span></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">GGO-Resultaten</div>
+          <div style="position: relative; height: 300px; width: 100%;">
             <canvas id="landUseChart"></canvas>
           </div>
         </div>
+
+        <div style="display: flex; align-items: center; justify-content: center;">
+          <button id="saveBtn" style="padding: 15px 50px; border-radius: 20px; font-size: 1.1em; background: #eee; border: 1px solid #aaa; box-shadow: 0 2px 2px rgba(0,0,0,0.1);">Save</button>
+        </div>
+
       </div>
     `;
   }
