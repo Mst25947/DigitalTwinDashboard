@@ -14,3 +14,6 @@ services:
 
 volumes:
   postgres_data:
+
+
+  #todo Zet de goede yml die in de cloud staat hierin om problemen te verkomen
