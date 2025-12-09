@@ -24,7 +24,16 @@ export class ContentBoxAnders extends LitElement {
 
     render() {
         return html`
-      <div id="content-box"></div>
+      <div id="content-box">
+      <p>BOB-Input</p>
+      <ul>
+        <li>Straat & Stoep</li>
+        <li>Wooneenheden</li>
+        <li>Parkeren</li>
+        <li>Tuin prive </li>
+        <li>Groen publiek </li>
+      </ul>
+      </div>
     `;
     }
 }
