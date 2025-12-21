@@ -4,10 +4,11 @@ import * as XLSX from "xlsx";
 export function initDashboard(root) {
     const get = (id) => root.getElementById(id);
     const tokenInput = get("tokenInput");
+    const sessionInput = get("sessionInput");
     const defaultDesignId = 8;
 
-    // De specifieke IDs die je in de grafiek wilt zien
-    const TARGET_INDICATORS = [48, 50, 53, 71, 72, 73, 74, 75, 76];
+    // BELANGRIJK: Zorg dat deze code ergens vandaan komt (bijv URL of input)
+    const sessionCode = "test";
 
     // Token laden
     const savedToken = localStorage.getItem('tygronToken');
@@ -26,14 +27,14 @@ export function initDashboard(root) {
 
     function generateExcel() {
         const wb = XLSX.utils.book_new();
-        // Simpele export van de tabel data
         const data = [
             ["Categorie", "Waarde"],
             ["Straat & Stoep", get("val-roads").textContent],
             ["Bebouwing", get("val-buildings").textContent],
             ["Parkeren", get("val-parking").textContent],
-            ["Tuin Prive", get("val-gardens").textContent],
-            ["Groen Publiek", get("val-public-green").textContent]
+            // Je kunt hier nu ook Unity data aan toevoegen
+            ["Draagvlak", get("unity-draagvlak").textContent],
+            ["Budget", get("unity-budget").textContent]
         ];
         const ws = XLSX.utils.aoa_to_sheet(data);
         XLSX.utils.book_append_sheet(wb, ws, "Resultaten");
@@ -46,16 +47,36 @@ export function initDashboard(root) {
     // Vult het tabelletje linksboven (BOB-Input)
     function updateTable(data) {
         const attr = data.attributes || {};
-        get("val-roads").textContent = toPerc(getAttrValue(attr, "FRACTION_ROADS"));
-        get("val-buildings").textContent = toPerc(getAttrValue(attr, "FRACTION_BUILDINGS"));
-        get("val-parking").textContent = toPerc(getAttrValue(attr, "FRACTION_PARKING"));
-        get("val-gardens").textContent = toPerc(getAttrValue(attr, "FRACTION_GARDENS"));
-        get("val-public-green").textContent = toPerc(getAttrValue(attr, "FRACTION_PUBLIC_GREEN"));
+        const safeSet = (id, val) => { if(get(id)) get(id).textContent = val; }
+
+        safeSet("val-roads", toPerc(getAttrValue(attr, "FRACTION_ROADS")));
+        safeSet("val-buildings", toPerc(getAttrValue(attr, "FRACTION_BUILDINGS")));
+        safeSet("val-parking", toPerc(getAttrValue(attr, "FRACTION_PARKING")));
+        safeSet("val-gardens", toPerc(getAttrValue(attr, "FRACTION_GARDENS")));
+        safeSet("val-public-green", toPerc(getAttrValue(attr, "FRACTION_PUBLIC_GREEN")));
     }
 
+    // --- NIEUW: Vult de Unity data in de HTML ---
+    function updateUnityCard(data) {
+        const safeSet = (id, val) => {
+            const el = get(id);
+            if(el) el.textContent = val;
+        };
 
-    function getColor(value) {
-        return "#2ecc71";
+        // Afronden op 1 decimaal of default 0
+        safeSet("unity-draagvlak", data.draagvlakAverage?.toFixed(1) ?? "-");
+        safeSet("unity-doel", data.doelAverage?.toFixed(1) ?? "-");
+
+        // Budget formatteren als Euro
+        if(get("unity-budget")) {
+            const budget = data.budgetAverage ?? 0;
+            get("unity-budget").textContent = `€ ${budget.toLocaleString('nl-NL')}`;
+        }
+
+        safeSet("unity-partij1", data.draagvlakPartij1 ?? "-");
+        safeSet("unity-partij2", data.draagvlakPartij2 ?? "-");
+        safeSet("unity-partij3", data.draagvlakPartij3 ?? "-");
+        safeSet("unity-partij4", data.draagvlakPartij4 ?? "-");
     }
 
     function createChart(indicators) {
@@ -63,16 +84,10 @@ export function initDashboard(root) {
         if (!chartCanvas) return;
         if (myChart) myChart.destroy();
 
-        // Data voorbereiden voor Chart.js
         const labels = indicators.map(i => i.name);
-
         const values = indicators.map(i => i.value !== undefined ? i.value : 0);
+        const colors = values.map(v => (v < 5 ? "#e74c3c" : v < 8 ? "#f39c12" : "#2ecc71"));
 
-        const colors = values.map(v => {
-            if (v < 5) return "#e74c3c"; 
-            if (v < 8) return "#f39c12";
-            return "#2ecc71";
-        });
         myChart = new Chart(chartCanvas, {
             type: "bar",
             data: {
@@ -90,27 +105,10 @@ export function initDashboard(root) {
                 maintainAspectRatio: false,
                 indexAxis: 'x',
                 scales: {
-                    y: {
-                        min: 1,
-                        max: 10,
-                        ticks: {
-                            stepSize: 0.1,
-                            callback: (value) => value.toFixed(1)
-                        },
-                        grid: { color: "#ccc" }
-                    },
-                    x: {
-                        ticks: {
-                            autoSkip: false,
-                            maxRotation: 90,
-                            minRotation: 45,
-                            font: { size: 10 }
-                        }
-                    }
+                    y: { min: 1, max: 10 },
+                    x: { ticks: { autoSkip: false, maxRotation: 90, minRotation: 45, font: { size: 10 } } }
                 },
-                plugins: {
-                    legend: { display: false }
-                }
+                plugins: { legend: { display: false } }
             }
         });
     }
@@ -138,14 +136,32 @@ export function initDashboard(root) {
             const headers = new Headers();
             headers.append('X-Tygron-Token', userToken);
 
-            //BOB-Input data
+            // 1. BOB-Input data
             const designRes = await fetch(`/api/tygron/parametric_designs/${defaultDesignId}`, { headers });
             if (designRes.ok) {
                 const designData = await designRes.json();
                 updateTable(designData);
             }
 
-            // GGO id's ophalen
+            // 2. UNITY Session data
+            console.log(`Ophalen sessie data voor: ${sessionCode}`);
+            const response = await fetch(`/api/session?sessionCode=${sessionCode}`, {
+                method: 'GET',
+                headers: { 'Content-Type': 'application/json' }
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                console.log("=== UNITY DATA ===", data);
+
+                // HIER: Update de UI met de opgehaalde data
+                updateUnityCard(data);
+
+            } else {
+                console.error("Kon sessie niet ophalen", response.status);
+            }
+
+            // 3. GGO id's ophalen
             console.log("Stap 1: Indicatoren lijst ophalen...");
             const listUrl = `https://engine.tygron.com/api/session/items/indicators/?f=JSON&token=${userToken}`;
             const listRes = await fetch(listUrl);
@@ -157,7 +173,7 @@ export function initDashboard(root) {
                 return;
             }
 
-            //GGO scores ophalen per id
+            // 4. GGO scores ophalen per id
             console.log(`Stap 2: Details ophalen voor ${foundIds.length} items...`);
             const detailRequests = foundIds.map(id =>
                 fetch(`https://engine.tygron.com/api/session/items/indicators/${id}/?f=JSON&token=${userToken}`)
@@ -167,21 +183,14 @@ export function initDashboard(root) {
 
             const detailedResults = await Promise.all(detailRequests);
 
-            //GGO scores verwerken
+            // GGO scores verwerken
             const processedIndicators = detailedResults
                 .filter(item => item !== null)
                 .map(ind => {
-                    let finalScore = ind.maquetteOverride?.SCORE_TOTAL?.[0];
-
-                    if (finalScore === undefined) {
-                        finalScore = ind.mapTypeValues?.MAQUETTE;
-                    }
-
-                    if (finalScore === undefined) {
-                        finalScore = ind.attributes?.SCORE_TOTAL?.[0];
-                    }
-
-                    finalScore = finalScore ?? 0;
+                    let finalScore = ind.maquetteOverride?.SCORE_TOTAL?.[0]
+                        ?? ind.mapTypeValues?.MAQUETTE
+                        ?? ind.attributes?.SCORE_TOTAL?.[0]
+                        ?? 0;
 
                     return {
                         id: ind.id,
@@ -191,8 +200,6 @@ export function initDashboard(root) {
                 });
 
             processedIndicators.sort((a, b) => a.id - b.id);
-            console.log("Dashboard Data:", processedIndicators);
-
             createChart(processedIndicators);
 
         } catch (err) {
@@ -201,5 +208,4 @@ export function initDashboard(root) {
             if(loading) loading.style.display = 'none';
         }
     }
-
 }
