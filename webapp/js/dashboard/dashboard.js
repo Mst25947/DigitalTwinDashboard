@@ -7,15 +7,13 @@ export function initDashboard(root) {
     const sessionInput = get("sessionInput");
     const defaultDesignId = 8;
 
-    // BELANGRIJK: Zorg dat deze code ergens vandaan komt (bijv URL of input)
-    const sessionCode = "test";
-
     // Token laden
     const savedToken = localStorage.getItem('tygronToken');
-    if (savedToken && tokenInput) {
-        tokenInput.value = savedToken;
-        loadDashboard(savedToken);
-    }
+    const savedSession = localStorage.getItem('sessionCode');
+    if (savedToken && tokenInput) tokenInput.value = savedToken;
+    if (savedSession && sessionInput) sessionInput.value = savedSession;
+
+    if (savedToken && savedSession) loadDashboard(savedToken, savedSession);
 
     let myChart = null;
 
@@ -32,9 +30,11 @@ export function initDashboard(root) {
             ["Straat & Stoep", get("val-roads").textContent],
             ["Bebouwing", get("val-buildings").textContent],
             ["Parkeren", get("val-parking").textContent],
-            // Je kunt hier nu ook Unity data aan toevoegen
-            ["Draagvlak", get("unity-draagvlak").textContent],
-            ["Budget", get("unity-budget").textContent]
+            ["Draagvlakken op een schaal van 1 tot 10:"],
+            ["Draagvlak Partij 1", get("unity-partij1").textContent],
+            ["Draagvlak Partij 2", get("unity-partij2").textContent],
+            ["Draagvlak Partij 3", get("unity-partij3").textContent],
+            ["Draagvlak Partij 4", get("unity-partij4").textContent]
         ];
         const ws = XLSX.utils.aoa_to_sheet(data);
         XLSX.utils.book_append_sheet(wb, ws, "Resultaten");
@@ -56,7 +56,6 @@ export function initDashboard(root) {
         safeSet("val-public-green", toPerc(getAttrValue(attr, "FRACTION_PUBLIC_GREEN")));
     }
 
-    // --- NIEUW: Vult de Unity data in de HTML ---
     function updateUnityCard(data) {
         const safeSet = (id, val) => {
             const el = get(id);
@@ -119,16 +118,21 @@ export function initDashboard(root) {
     if (fetchBtn) {
         fetchBtn.addEventListener('click', () => {
             const userToken = tokenInput.value.trim();
-            if (userToken) {
-                localStorage.setItem('tygronToken', userToken)
-                loadDashboard(userToken);
-            } else {
-                alert("Voer token in");
+            const sessionCode = sessionInput.value.trim(); // <--- NIEUW: Waarde ophalen
+
+            if (!userToken || !sessionCode) {
+                alert("Vul zowel het Token als de Sessie Code in.");
+                return;
             }
+
+            localStorage.setItem('tygronToken', userToken);
+            localStorage.setItem('sessionCode', sessionCode);
+
+            loadDashboard(userToken, sessionCode);
         });
     }
 
-    async function loadDashboard(userToken) {
+    async function loadDashboard(userToken, sessionCode) {
         const loading = get("loading");
         if(loading) loading.style.display = 'inline-block';
 

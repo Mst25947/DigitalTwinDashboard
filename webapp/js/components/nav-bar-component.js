@@ -45,7 +45,7 @@ export class NavBar extends LitElement {
 
   render() {
     return html`
-        <nav-provincie-utrecht-logo></nav-provincie-utrecht-logo>
+<!--        <nav-provincie-utrecht-logo></nav-provincie-utrecht-logo>-->
         <div id="navigational-items">
           <nav-bar-navigational-items label="Resultaten" route="/resultaten"></nav-bar-navigational-items>
           <nav-bar-separator></nav-bar-separator>
