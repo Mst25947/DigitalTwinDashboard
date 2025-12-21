@@ -129,6 +129,7 @@ export class ResultatenPage extends LitElement {
 
       <div class="controls">
         <input type="text" id="tokenInput" placeholder="Tygron Token">
+        <input type="text" id="sessionInput" placeholder="Bobgame Code">
         <button id="fetchBtn">Laad Ontwerp</button>
         <button id="excelBtn">Export Excel</button>
         <span id="loading" class="loading-msg">Laden...</span>
@@ -171,12 +172,33 @@ export class ResultatenPage extends LitElement {
         </div>
 
         <div class="card">
-          <div class="card-title">BOB-BGR</div>
-          <div class="card-subtitle">Doelstellingen en Budget</div>
+          <div class="card-title">Participatie Data</div>
+          <div class="card-subtitle">Live data uit de sessie</div>
 
-          <div class="bgr-content">
-            <div style="margin-bottom: 10px;">% Doel: <span style="font-weight: normal;">--</span></div>
-            <div style="margin-bottom: 10px;">% Budget: <span style="font-weight: normal;">--</span></div>
+          <div class="data-table">
+            <div class="data-row" style="font-size: 0.9em; color: #666; margin-bottom: 10px;">
+              <span></span><span>Resultaat:</span>
+            </div>
+
+<!--            <div class="data-row">-->
+<!--              <span class="data-label">Gemiddeld Draagvlak:</span>-->
+<!--              <span class="data-value" id="unity-draagvlak" style="color: #27ae60;">&#45;&#45;</span>-->
+<!--            </div>-->
+<!--            <div class="data-row">-->
+<!--              <span class="data-label">Behaald Doel:</span>-->
+<!--              <span class="data-value" id="unity-doel">&#45;&#45;</span>-->
+<!--            </div>-->
+<!--            <div class="data-row">-->
+<!--              <span class="data-label">Budget Benut:</span>-->
+<!--              <span class="data-value" id="unity-budget">&#45;&#45;</span>-->
+<!--            </div>-->
+
+            <div class="sub-header">Draagvlak per partij:</div>
+            <div class="data-row"><span class="data-label">Partij 1:</span><span class="data-value" id="unity-partij1">--</span></div>
+            <div class="data-row"><span class="data-label">Partij 2:</span><span class="data-value" id="unity-partij2">--</span></div>
+            <div class="data-row"><span class="data-label">Partij 3:</span><span class="data-value" id="unity-partij3">--</span></div>
+            <div class="data-row"><span class="data-label">Partij 4:</span><span class="data-value" id="unity-partij4">--</span></div>
+
           </div>
         </div>
 
@@ -187,9 +209,7 @@ export class ResultatenPage extends LitElement {
           </div>
         </div>
 
-        <div style="display: flex; align-items: center; justify-content: center;">
-          <button id="saveBtn" style="padding: 15px 50px; border-radius: 20px; font-size: 1.1em; background: #eee; border: 1px solid #aaa; box-shadow: 0 2px 2px rgba(0,0,0,0.1);">Save</button>
-        </div>
+
 
       </div>
     `;
