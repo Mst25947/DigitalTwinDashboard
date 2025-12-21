@@ -4,6 +4,7 @@ import nl.inno.digitaltwindashboard.dashboard.Application.TygronService;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
+@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/tygron")
 public class TygronController {
