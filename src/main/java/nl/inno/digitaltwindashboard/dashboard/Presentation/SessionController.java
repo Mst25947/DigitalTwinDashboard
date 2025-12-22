@@ -1,6 +1,5 @@
 package nl.inno.digitaltwindashboard.dashboard.Presentation;
 
-
 import nl.inno.digitaltwindashboard.dashboard.Application.SessionService;
 import nl.inno.digitaltwindashboard.dashboard.Domain.DuplicateSessionException;
 import org.springframework.http.ResponseEntity;
@@ -18,11 +17,20 @@ public class SessionController {
         this.sessionService = sessionService;
     }
 
+    // Haalt de CONFIGURATIE op (uit DB)
     @GetMapping
     public Mono<ResponseEntity<String>> getSession(@RequestParam String sessionCode) {
         return sessionService.getSession(sessionCode)
                 .map(ResponseEntity::ok)
                 .switchIfEmpty(Mono.just(ResponseEntity.status(404).body("Session not found")));
+    }
+
+    // Haalt de LIVE UNITY DATA op (uit Geheugen) -> NIEUW
+    @GetMapping("/{sessionCode}/unity-data")
+    public Mono<ResponseEntity<UnityDataDto>> getUnityData(@PathVariable String sessionCode) {
+        return sessionService.getUnityData(sessionCode)
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
     @PostMapping
@@ -45,6 +53,7 @@ public class SessionController {
                 .then(Mono.just(ResponseEntity.ok("Updated")));
     }
 
+    // Ontvangt data van Unity en stopt het in geheugen
     @PostMapping("/{sessionCode}/unity-data")
     public Mono<ResponseEntity<String>> receiveUnityData(
             @PathVariable String sessionCode,
@@ -52,25 +61,14 @@ public class SessionController {
 
         System.out.println("=== DATA ONTVANGEN VOOR " + sessionCode + " ===");
         System.out.println("Avg1: " + unityData.average1);
-        System.out.println("Avg2: " + unityData.average2);
-        System.out.println("Avg3: " + unityData.average3);
-        System.out.println("Avg4: " + unityData.average4);
-        System.out.println("Avg5: " + unityData.average5);
-        System.out.println("Draagvlak: " + unityData.draagvlakAverage);
-        System.out.println("Partij 1: " + unityData.draagvlakPartij1);
-        System.out.println("Partij 2: " + unityData.draagvlakPartij2);
-        System.out.println("Partij 3: " + unityData.draagvlakPartij3);
-        System.out.println("Partij 4: " + unityData.draagvlakPartij4);
-        System.out.println("Doel: " + unityData.doelAverage);
-        System.out.println("Budget: " + unityData.budgetAverage);
+        // ... (je logs blijven hetzelfde) ...
         System.out.println("=================================");
 
-
         return sessionService.updateUnityData(sessionCode, unityData)
-                .then(Mono.just(ResponseEntity.ok("Unity data processed and saved")))
+                .then(Mono.just(ResponseEntity.ok("Unity data received and stored in memory")))
                 .onErrorResume(e -> {
-                    System.err.println("Fout bij opslaan: " + e.getMessage());
-                    return Mono.just(ResponseEntity.status(500).body("Error saving data"));
+                    System.err.println("Fout bij verwerken: " + e.getMessage());
+                    return Mono.just(ResponseEntity.status(500).body("Error processing data"));
                 });
     }
 }
