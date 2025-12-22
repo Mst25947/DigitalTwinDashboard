@@ -59,11 +59,6 @@ public class SessionController {
             @PathVariable String sessionCode,
             @RequestBody UnityDataDto unityData) {
 
-        System.out.println("=== DATA ONTVANGEN VOOR " + sessionCode + " ===");
-        System.out.println("Avg1: " + unityData.average1);
-        // ... (je logs blijven hetzelfde) ...
-        System.out.println("=================================");
-
         return sessionService.updateUnityData(sessionCode, unityData)
                 .then(Mono.just(ResponseEntity.ok("Unity data received and stored in memory")))
                 .onErrorResume(e -> {

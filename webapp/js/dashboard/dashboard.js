@@ -7,17 +7,21 @@ export function initDashboard(root) {
     const sessionInput = get("sessionInput");
     const defaultDesignId = 8;
 
-    // Token laden
+    // Timer variabele
+    let pollingInterval = null;
+    let myChart = null;
+
+    // Token laden uit localstorage
     const savedToken = localStorage.getItem('tygronToken');
     const savedSession = localStorage.getItem('sessionCode');
     if (savedToken && tokenInput) tokenInput.value = savedToken;
     if (savedSession && sessionInput) sessionInput.value = savedSession;
 
-    if (savedToken && savedSession) loadDashboard(savedToken, savedSession);
+    if (savedToken && savedSession) {
+        loadDashboard(savedToken, savedSession);
+    }
 
-    let myChart = null;
-
-    // Excel Export Setup
+    // --- EXCEL EXPORT ---
     const excelBtn = get("excelBtn");
     if (excelBtn) {
         excelBtn.addEventListener("click", generateExcel);
@@ -41,10 +45,10 @@ export function initDashboard(root) {
         XLSX.writeFile(wb, "Tygron_Resultaten.xlsx");
     }
 
+    // --- HULP FUNCTIES ---
     const getAttrValue = (attr, key) => attr[key]?.[0] ?? 0;
     const toPerc = (val) => (val * 100).toFixed(0) + "%";
 
-    // Vult het tabelletje linksboven (BOB-Input)
     function updateTable(data) {
         const attr = data.attributes || {};
         const safeSet = (id, val) => { if(get(id)) get(id).textContent = val; }
@@ -62,20 +66,19 @@ export function initDashboard(root) {
             if(el) el.textContent = val;
         };
 
-        // Afronden op 1 decimaal of default 0
-        safeSet("unity-draagvlak", data.draagvlakAverage?.toFixed(1) ?? "-");
-        safeSet("unity-doel", data.doelAverage?.toFixed(1) ?? "-");
+        // Als data undefined is, toon een streepje. Anders 1 decimaal.
+        safeSet("unity-draagvlak", data.draagvlakAverage !== undefined ? Number(data.draagvlakAverage).toFixed(1) : "-");
+        safeSet("unity-doel", data.doelAverage !== undefined ? Number(data.doelAverage).toFixed(1) : "-");
 
-        // Budget formatteren als Euro
         if(get("unity-budget")) {
             const budget = data.budgetAverage ?? 0;
-            get("unity-budget").textContent = `€ ${budget.toLocaleString('nl-NL')}`;
+            get("unity-budget").textContent = `€ ${Number(budget).toLocaleString('nl-NL')}`;
         }
 
-        safeSet("unity-partij1", data.draagvlakPartij1 ?? "-");
-        safeSet("unity-partij2", data.draagvlakPartij2 ?? "-");
-        safeSet("unity-partij3", data.draagvlakPartij3 ?? "-");
-        safeSet("unity-partij4", data.draagvlakPartij4 ?? "-");
+        safeSet("unity-partij1", data.draagvlakPartij1 !== undefined ? Number(data.draagvlakPartij1).toFixed(1) : "-");
+        safeSet("unity-partij2", data.draagvlakPartij2 !== undefined ? Number(data.draagvlakPartij2).toFixed(1) : "-");
+        safeSet("unity-partij3", data.draagvlakPartij3 !== undefined ? Number(data.draagvlakPartij3).toFixed(1) : "-");
+        safeSet("unity-partij4", data.draagvlakPartij4 !== undefined ? Number(data.draagvlakPartij4).toFixed(1) : "-");
     }
 
     function createChart(indicators) {
@@ -112,13 +115,12 @@ export function initDashboard(root) {
         });
     }
 
-    // --- API CALLS ---
-
+    // --- BUTTON LISTENER ---
     const fetchBtn = get("fetchBtn");
     if (fetchBtn) {
         fetchBtn.addEventListener('click', () => {
             const userToken = tokenInput.value.trim();
-            const sessionCode = sessionInput.value.trim(); // <--- NIEUW: Waarde ophalen
+            const sessionCode = sessionInput.value.trim();
 
             if (!userToken || !sessionCode) {
                 alert("Vul zowel het Token als de Sessie Code in.");
@@ -132,40 +134,54 @@ export function initDashboard(root) {
         });
     }
 
+    // --- FUNCTIE: Live Unity Data Ophalen ---
+    async function fetchLiveUnityData(sessionCode) {
+        try {
+
+            const url = `/api/session/${sessionCode}/unity-data`;
+
+            const response = await fetch(url);
+            if (response.ok) {
+                const data = await response.json();
+                updateUnityCard(data);
+            } else {
+                if(response.status !== 404) {
+                    console.warn("Status live data:", response.status);
+                }
+            }
+        } catch (e) {
+            console.error("Netwerkfout bij live data:", e);
+        }
+    }
+
+    // --- HOOFD FUNCTIE ---
     async function loadDashboard(userToken, sessionCode) {
         const loading = get("loading");
         if(loading) loading.style.display = 'inline-block';
+
+        // 1. Reset timer om dubbele calls te voorkomen
+        if (pollingInterval) {
+            clearInterval(pollingInterval);
+            pollingInterval = null;
+        }
 
         try {
             const headers = new Headers();
             headers.append('X-Tygron-Token', userToken);
 
-            // 1. BOB-Input data
+            // 2. Tygron Input Data
             const designRes = await fetch(`/api/tygron/parametric_designs/${defaultDesignId}`, { headers });
             if (designRes.ok) {
                 const designData = await designRes.json();
                 updateTable(designData);
             }
 
-            // 2. UNITY Session data
-            console.log(`Ophalen sessie data voor: ${sessionCode}`);
-            const response = await fetch(`/api/session?sessionCode=${sessionCode}`, {
-                method: 'GET',
-                headers: { 'Content-Type': 'application/json' }
-            });
+            // 3. START UNITY POLLING (Elke seconde)
+            console.log(`Start polling voor sessie: ${sessionCode}`);
+            fetchLiveUnityData(sessionCode); // Direct 1x
 
-            if (response.ok) {
-                const data = await response.json();
-                console.log("=== UNITY DATA ===", data);
 
-                // HIER: Update de UI met de opgehaalde data
-                updateUnityCard(data);
-
-            } else {
-                console.error("Kon sessie niet ophalen", response.status);
-            }
-
-            // 3. GGO id's ophalen
+            // 4. Tygron GGO Indicatoren
             console.log("Stap 1: Indicatoren lijst ophalen...");
             const listUrl = `https://engine.tygron.com/api/session/items/indicators/?f=JSON&token=${userToken}`;
             const listRes = await fetch(listUrl);
@@ -177,7 +193,6 @@ export function initDashboard(root) {
                 return;
             }
 
-            // 4. GGO scores ophalen per id
             console.log(`Stap 2: Details ophalen voor ${foundIds.length} items...`);
             const detailRequests = foundIds.map(id =>
                 fetch(`https://engine.tygron.com/api/session/items/indicators/${id}/?f=JSON&token=${userToken}`)
@@ -187,7 +202,6 @@ export function initDashboard(root) {
 
             const detailedResults = await Promise.all(detailRequests);
 
-            // GGO scores verwerken
             const processedIndicators = detailedResults
                 .filter(item => item !== null)
                 .map(ind => {
