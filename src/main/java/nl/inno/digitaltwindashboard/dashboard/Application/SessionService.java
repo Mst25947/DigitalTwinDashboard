@@ -1,23 +1,32 @@
 package nl.inno.digitaltwindashboard.dashboard.Application;
 
-import com.fasterxml.jackson.databind.ObjectMapper; // Zorg voor deze import
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import nl.inno.digitaltwindashboard.dashboard.Data.SessionRepository;
 import nl.inno.digitaltwindashboard.dashboard.Domain.DuplicateSessionException;
 import nl.inno.digitaltwindashboard.dashboard.Domain.SessionEntity;
-import nl.inno.digitaltwindashboard.dashboard.Presentation.UnityDataDto; // Importeer je DTO
+import nl.inno.digitaltwindashboard.dashboard.Presentation.UnityDataDto;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
-import java.util.Optional;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 public class SessionService {
+
     private final SessionRepository repository;
     private final ObjectMapper objectMapper = new ObjectMapper();
+
+    // HIER slaan we de Unity resultaten op in het werkgeheugen.
+    // Dit raakt de database NIET aan, dus je overschrijft nooit je game-configuratie.
+    private final Map<String, UnityDataDto> unityDataStore = new ConcurrentHashMap<>();
 
     public SessionService(SessionRepository repository) {
         this.repository = repository;
     }
+
+    // --- DATABASE METHODES (Voor Game Configuratie) ---
 
     public Mono<String> getSession(String sessionCode) {
         return Mono.justOrEmpty(repository.findById(sessionCode))
@@ -35,6 +44,7 @@ public class SessionService {
 
     public Mono<Void> updateSession(String sessionJson) {
         String sessionCode = extractSessionCode(sessionJson);
+        // Dit overschrijft de configuratie in de DB (bedoeld voor de Admin editor)
         repository.save(new SessionEntity(sessionCode, sessionJson));
         return Mono.empty();
     }
@@ -43,38 +53,38 @@ public class SessionService {
         return updateSession(sessionJson);
     }
 
+    // --- GEHEUGEN METHODES (Voor Unity Resultaten) ---
+
+    /**
+     * Slaat de data van Unity op in een tijdelijke Map in het geheugen.
+     * GEEN database interactie hier!
+     */
     public Mono<Void> updateUnityData(String sessionCode, UnityDataDto unityData) {
-        // 1. Zoek de sessie in de database (JPA is synchroon, dus we krijgen een Optional)
-        Optional<SessionEntity> sessionOpt = repository.findById(sessionCode);
+        System.out.println(">> SERVICE: Opslaan in geheugen voor sessie: " + sessionCode);
 
-        if (sessionOpt.isPresent()) {
-            SessionEntity session = sessionOpt.get();
-            try {
-                // 2. Zet de DTO met getallen om naar een JSON string
-                String jsonString = objectMapper.writeValueAsString(unityData);
+        // Stop de data in de map
+        unityDataStore.put(sessionCode, unityData);
 
-                // 3. Update de sessie data
-                session.setJsonData(jsonString);
-
-                // 4. Sla op in de database
-                repository.save(session);
-
-                return Mono.empty();
-            } catch (Exception e) {
-                return Mono.error(new RuntimeException("Kon Unity data niet opslaan: " + e.getMessage()));
-            }
-        } else {
-            return Mono.error(new RuntimeException("Sessie niet gevonden met code: " + sessionCode));
-        }
+        return Mono.empty();
     }
-    // ---------------------------------------
+
+    /**
+     * Haalt de data op uit het geheugen (voor het dashboard).
+     */
+    public Mono<UnityDataDto> getUnityData(String sessionCode) {
+        UnityDataDto data = unityDataStore.get(sessionCode);
+        // Geeft de data terug, of leeg als er nog niks is ontvangen
+        return Mono.justOrEmpty(data);
+    }
+
+    // --- HULP METHODES ---
 
     private String extractSessionCode(String json) {
         try {
-            com.fasterxml.jackson.databind.JsonNode node = objectMapper.readTree(json);
+            JsonNode node = objectMapper.readTree(json);
             return node.get("sessionCode").asText();
         } catch (Exception e) {
-            throw new RuntimeException("Invalid JSON");
+            throw new RuntimeException("Invalid JSON: sessionCode missing or wrong format");
         }
     }
 }
