@@ -1,6 +1,12 @@
 import { LitElement, html, css } from "lit";
 import { initDashboard } from "../../js/dashboard/dashboard.js";
 
+// 1. HIER IMPORTEREN WE DE PLAATJES (Net als je logo)
+// De build-tool zorgt dat deze paden altijd kloppen
+import defaultImg from "../../img/default.png";
+import happyImg from "../../img/happy.png";
+import sadImg from "../../img/sad.png";
+
 export class ResultatenPage extends LitElement {
   static styles = css`
     :host {
@@ -18,7 +24,13 @@ export class ResultatenPage extends LitElement {
       transition: filter 0.3s ease;
     }
 
-    /* KLEUR FILTERS VOOR DE ICOONTJES */
+    .value-container {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+    }
+
+
     .status-icon-red {
       filter: invert(27%) sepia(51%) saturate(2878%) hue-rotate(346deg) brightness(104%) contrast(97%);
     }
@@ -31,13 +43,7 @@ export class ResultatenPage extends LitElement {
       filter: invert(63%) sepia(59%) saturate(479%) hue-rotate(85deg) brightness(89%) contrast(87%);
     }
 
-    .value-container {
-      display: flex;
-      align-items: center;
-      justify-content: flex-end;
-    }
-
-    /* STATUS KLEUREN */
+    /* STATUS TEKST KLEUREN */
     .status-green { color: #2ecc71; font-weight: bold; }
     .status-orange { color: #f39c12; font-weight: bold; }
     .status-red { color: #e74c3c; font-weight: bold; }
@@ -113,7 +119,7 @@ export class ResultatenPage extends LitElement {
     .data-row {
       display: flex;
       justify-content: space-between;
-      align-items: center; 
+      align-items: center;
       padding: 8px 0;
       border-bottom: 1px solid #f0f0f0;
     }
@@ -124,7 +130,8 @@ export class ResultatenPage extends LitElement {
   `;
 
   firstUpdated() {
-    initDashboard(this.shadowRoot);
+    // 2. We geven de afbeelding-variabelen mee aan het script
+    initDashboard(this.shadowRoot, { defaultImg, happyImg, sadImg });
   }
 
   render() {
@@ -168,7 +175,7 @@ export class ResultatenPage extends LitElement {
             <div class="data-row">
               <span class="data-label">Partij 1:</span>
               <div class="value-container">
-                <img id="img-partij1" src="../img/default.png" class="status-icon" alt="" />
+                <img id="img-partij1" src="${defaultImg}" class="status-icon" alt="" />
                 <span class="data-value" id="unity-partij1">--</span>
               </div>
             </div>
@@ -176,7 +183,7 @@ export class ResultatenPage extends LitElement {
             <div class="data-row">
               <span class="data-label">Partij 2:</span>
               <div class="value-container">
-                <img id="img-partij2" src="../img/default.png" class="status-icon" alt="" />
+                <img id="img-partij2" src="${defaultImg}" class="status-icon" alt="" />
                 <span class="data-value" id="unity-partij2">--</span>
               </div>
             </div>
@@ -184,7 +191,7 @@ export class ResultatenPage extends LitElement {
             <div class="data-row">
               <span class="data-label">Partij 3:</span>
               <div class="value-container">
-                <img id="img-partij3" src="../img/default.png" class="status-icon" alt="" />
+                <img id="img-partij3" src="${defaultImg}" class="status-icon" alt="" />
                 <span class="data-value" id="unity-partij3">--</span>
               </div>
             </div>
@@ -192,7 +199,7 @@ export class ResultatenPage extends LitElement {
             <div class="data-row">
               <span class="data-label">Partij 4:</span>
               <div class="value-container">
-                <img id="img-partij4" src="../img/default.png" class="status-icon" alt="" />
+                <img id="img-partij4" src="${defaultImg}" class="status-icon" alt="" />
                 <span class="data-value" id="unity-partij4">--</span>
               </div>
             </div>
