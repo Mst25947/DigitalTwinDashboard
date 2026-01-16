@@ -60,25 +60,79 @@ export function initDashboard(root) {
         safeSet("val-public-green", toPerc(getAttrValue(attr, "FRACTION_PUBLIC_GREEN")));
     }
 
+
     function updateUnityCard(data) {
+
+        // Hulpfunctie: update tekst, kleur EN plaatje
+        const setScoreWithVisuals = (textId, imgId, rawValue) => {
+            const textEl = get(textId);
+            const imgEl = get(imgId); // Zoek het plaatje
+
+            if (!textEl) return;
+
+            // Reset alles als er geen data is
+            if (rawValue === undefined || rawValue === null) {
+                textEl.textContent = "-";
+                textEl.classList.remove('status-green', 'status-orange', 'status-red');
+                if(imgEl) {
+                    imgEl.src = "../img/default.png";
+                    // Verwijder alle kleurfilters
+                    imgEl.classList.remove('status-icon-red', 'status-icon-orange', 'status-icon-green');
+                }
+                return;
+            }
+
+            const val = Number(rawValue);
+            textEl.textContent = val.toFixed(1);
+
+            // Verwijder oude tekst- en plaatjes-classes
+            textEl.classList.remove('status-green', 'status-orange', 'status-red');
+            if(imgEl) {
+                imgEl.classList.remove('status-icon-red', 'status-icon-orange', 'status-icon-green');
+            }
+
+            // --- LOGICA VOOR KLEUR EN PLAATJE ---
+            if (val < 5) {
+                textEl.classList.add('status-red');
+                if(imgEl) {
+                    imgEl.src = "../img/sad.png";
+                    imgEl.classList.add('status-icon-red');
+                }
+            } else if (val < 7.5) {
+                textEl.classList.add('status-orange');
+                if(imgEl) {
+                    imgEl.src = "../img/default.png";
+                    imgEl.classList.add('status-icon-orange');
+                }
+            } else {
+                textEl.classList.add('status-green');
+                if(imgEl) {
+                    imgEl.src = "../img/happy.png";
+                    imgEl.classList.add('status-icon-green'); // Voeg het groene filter toe
+                }
+            }
+        };
+
         const safeSet = (id, val) => {
             const el = get(id);
             if(el) el.textContent = val;
         };
 
-        // Als data undefined is, toon een streepje. Anders 1 decimaal.
-        safeSet("unity-draagvlak", data.draagvlakAverage !== undefined ? Number(data.draagvlakAverage).toFixed(1) : "-");
-        safeSet("unity-doel", data.doelAverage !== undefined ? Number(data.doelAverage).toFixed(1) : "-");
-
+        // Budget
         if(get("unity-budget")) {
             const budget = data.budgetAverage ?? 0;
             get("unity-budget").textContent = `€ ${Number(budget).toLocaleString('nl-NL')}`;
         }
 
-        safeSet("unity-partij1", data.draagvlakPartij1 !== undefined ? Number(data.draagvlakPartij1).toFixed(1) : "-");
-        safeSet("unity-partij2", data.draagvlakPartij2 !== undefined ? Number(data.draagvlakPartij2).toFixed(1) : "-");
-        safeSet("unity-partij3", data.draagvlakPartij3 !== undefined ? Number(data.draagvlakPartij3).toFixed(1) : "-");
-        safeSet("unity-partij4", data.draagvlakPartij4 !== undefined ? Number(data.draagvlakPartij4).toFixed(1) : "-");
+        // De aanroep met de juiste ID's voor tekst EN plaatje
+        setScoreWithVisuals("unity-partij1", "img-partij1", data.draagvlakPartij1);
+        setScoreWithVisuals("unity-partij2", "img-partij2", data.draagvlakPartij2);
+        setScoreWithVisuals("unity-partij3", "img-partij3", data.draagvlakPartij3);
+        setScoreWithVisuals("unity-partij4", "img-partij4", data.draagvlakPartij4);
+
+        // Gemiddelden
+        safeSet("unity-draagvlak", data.draagvlakAverage !== undefined ? Number(data.draagvlakAverage).toFixed(1) : "-");
+        safeSet("unity-doel", data.doelAverage !== undefined ? Number(data.doelAverage).toFixed(1) : "-");
     }
 
     function createChart(indicators) {
@@ -134,11 +188,10 @@ export function initDashboard(root) {
         });
     }
 
-    // --- FUNCTIE: Live Unity Data Ophalen ---
+    // Live Unity Data Ophalen
     async function fetchLiveUnityData(sessionCode) {
         try {
-
-            const url = `/api/session/${sessionCode}/unity-data`;
+            const url = `https://bob-dashboard.nl/api/session/${sessionCode}/unity-data`;
 
             const response = await fetch(url);
             if (response.ok) {
@@ -154,12 +207,12 @@ export function initDashboard(root) {
         }
     }
 
-    // --- HOOFD FUNCTIE ---
+    // Hoofd functie
     async function loadDashboard(userToken, sessionCode) {
         const loading = get("loading");
         if(loading) loading.style.display = 'inline-block';
 
-        // 1. Reset timer om dubbele calls te voorkomen
+        //Reset timer
         if (pollingInterval) {
             clearInterval(pollingInterval);
             pollingInterval = null;
@@ -169,19 +222,18 @@ export function initDashboard(root) {
             const headers = new Headers();
             headers.append('X-Tygron-Token', userToken);
 
-            // 2. Tygron Input Data
+            //Tygron Input Data
             const designRes = await fetch(`/api/tygron/parametric_designs/${defaultDesignId}`, { headers });
             if (designRes.ok) {
                 const designData = await designRes.json();
                 updateTable(designData);
             }
 
-            // 3. START UNITY POLLING (Elke seconde)
+            //START UNITY POLLING (Live Data)
             console.log(`Start polling voor sessie: ${sessionCode}`);
             fetchLiveUnityData(sessionCode); // Direct 1x
 
-
-            // 4. Tygron GGO Indicatoren
+            // Tygron GGO Indicatoren
             console.log("Stap 1: Indicatoren lijst ophalen...");
             const listUrl = `https://engine.tygron.com/api/session/items/indicators/?f=JSON&token=${userToken}`;
             const listRes = await fetch(listUrl);
