@@ -10,11 +10,15 @@ export class NavBar extends LitElement {
       align-items: center;
       height: 90px;
       width: 100%;
-      background-color: #f5f5f5;
+      background-color: #ffffffff;
       border-bottom: 2px solid #ccc;
       font-family: sans-serif;
       position: relative;
       box-shadow: 0 2px 4px rgba(34, 34, 34, 0.5);
+    }
+
+    #nav-provincie-utrecht-logo {
+    align-self: stretch;
     }
       
     #navigational-items {
@@ -45,7 +49,7 @@ export class NavBar extends LitElement {
 
   render() {
     return html`
-<!--        <nav-provincie-utrecht-logo></nav-provincie-utrecht-logo>-->
+      <nav-provincie-utrecht-logo></nav-provincie-utrecht-logo>
         <div id="navigational-items">
           <nav-bar-navigational-items label="Resultaten" route="/resultaten"></nav-bar-navigational-items>
           <nav-bar-separator></nav-bar-separator>

@@ -23,18 +23,18 @@ export class ProvincieUtrechtLogo extends LitElement {
 
   static get styles() {
     return css`
-      img {
-        height: 20em;
-        width: auto;
-        object-fit: contain;
-      }
+      :host {
+  height: 90px;          /* 👈 fallback */
+  display: flex;
+  align-items: center;
+}
 
-      :host,
-      a {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-      }
+img {
+  height: 60px;          /* visual size */
+  max-height: 100%;
+  width: auto;
+  object-fit: contain;
+}
     `;
   }
 }
