@@ -21,7 +21,6 @@ export function initDashboard(root) {
         loadDashboard(savedToken, savedSession);
     }
 
-    // --- EXCEL EXPORT ---
     const excelBtn = get("excelBtn");
     if (excelBtn) {
         excelBtn.addEventListener("click", generateExcel);
