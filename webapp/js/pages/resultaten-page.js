@@ -31,17 +31,7 @@ export class ResultatenPage extends LitElement {
     }
 
 
-    .status-icon-red {
-      filter: invert(27%) sepia(51%) saturate(2878%) hue-rotate(346deg) brightness(104%) contrast(97%);
-    }
-
-    .status-icon-orange {
-      filter: invert(73%) sepia(37%) saturate(4328%) hue-rotate(1deg) brightness(102%) contrast(106%);
-    }
-
-    .status-icon-green {
-      filter: invert(63%) sepia(59%) saturate(479%) hue-rotate(85deg) brightness(89%) contrast(87%);
-    }
+   
 
     /* STATUS TEKST KLEUREN */
     .status-green { color: #2ecc71; font-weight: bold; }
