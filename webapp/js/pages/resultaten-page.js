@@ -1,6 +1,12 @@
 import { LitElement, html, css } from "lit";
 import { initDashboard } from "../../js/dashboard/dashboard.js";
 
+// 1. HIER IMPORTEREN WE DE PLAATJES (Net als je logo)
+// De build-tool zorgt dat deze paden altijd kloppen
+import defaultImg from "../../img/default.png";
+import happyImg from "../../img/happy.png";
+import sadImg from "../../img/sad.png";
+
 export class ResultatenPage extends LitElement {
   static styles = css`
     :host {
@@ -9,6 +15,30 @@ export class ResultatenPage extends LitElement {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
 
+    .status-icon {
+      height: 24px;
+      width: 24px;
+      object-fit: contain;
+      vertical-align: middle;
+      margin-right: 10px;
+      transition: filter 0.3s ease;
+    }
+
+    .value-container {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+    }
+
+
+   
+
+    /* STATUS TEKST KLEUREN */
+    .status-green { color: #2ecc71; font-weight: bold; }
+    .status-orange { color: #f39c12; font-weight: bold; }
+    .status-red { color: #e74c3c; font-weight: bold; }
+
+    /* HEADER & ALGEMEEN */
     header {
       background-color: #dcdcdc;
       padding: 10px 20px;
@@ -18,16 +48,6 @@ export class ResultatenPage extends LitElement {
       border-bottom: 3px solid #fff;
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
-
-    .brand {
-      font-size: 1.2rem;
-      font-weight: bold;
-      color: #333;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    
     .controls {
       background: white;
       padding: 10px 20px;
@@ -35,7 +55,6 @@ export class ResultatenPage extends LitElement {
       gap: 10px;
       border-bottom: 1px solid #ccc;
     }
-
     input { padding: 5px; border: 1px solid #ccc; border-radius: 4px; }
     button {
       padding: 6px 12px;
@@ -47,6 +66,7 @@ export class ResultatenPage extends LitElement {
     #fetchBtn { background-color: #333; color: white; }
     #excelBtn { background-color: #217346; color: white; }
 
+    /* GRID & CARDS */
     .dashboard-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -56,7 +76,6 @@ export class ResultatenPage extends LitElement {
       max-width: 1400px;
       margin: 0 auto;
     }
-
     .card {
       background: white;
       border-radius: 8px;
@@ -66,7 +85,6 @@ export class ResultatenPage extends LitElement {
       flex-direction: column;
       position: relative;
     }
-
     .card-title {
       font-size: 1.5rem;
       font-weight: bold;
@@ -74,7 +92,6 @@ export class ResultatenPage extends LitElement {
       margin-bottom: 5px;
       color: #000;
     }
-
     .card-subtitle {
       text-align: center;
       font-size: 0.8rem;
@@ -82,53 +99,39 @@ export class ResultatenPage extends LitElement {
       margin-bottom: 20px;
     }
 
+    /* TABLE LAYOUT */
     .data-table {
       width: 100%;
       font-size: 1rem;
       font-weight: 600;
       color: #333;
     }
-
     .data-row {
       display: flex;
       justify-content: space-between;
+      align-items: center;
       padding: 8px 0;
       border-bottom: 1px solid #f0f0f0;
     }
-
     .data-row:last-child { border-bottom: none; }
     .data-label { text-align: left; }
-    .data-value { text-align: right; font-weight: bold; }
-
-    .chart-container {
-      grid-column: 1 / -1; 
-      max-width: 600px; 
-    }
-
-  
-    .bgr-content {
-      margin-top: 20px;
-      font-weight: bold;
-    }
 
     .loading-msg { color: #007bff; font-weight: bold; margin-left: 10px; display: none; }
   `;
 
   firstUpdated() {
-    initDashboard(this.shadowRoot);
+    // 2. We geven de afbeelding-variabelen mee aan het script
+    initDashboard(this.shadowRoot, { defaultImg, happyImg, sadImg });
   }
 
   render() {
     return html`
-
-
       <div class="controls">
         <input type="text" id="tokenInput" placeholder="Tygron Token">
         <input type="text" id="sessionInput" placeholder="Bobgame Code">
         <button id="fetchBtn">Laad Ontwerp</button>
         <button id="excelBtn">Export Excel</button>
         <span id="loading" class="loading-msg">Laden...</span>
-        <span id="displayToken" style="font-size: 0.8em; color: #999; margin-left: auto;"></span>
       </div>
 
       <div class="dashboard-grid">
@@ -136,33 +139,15 @@ export class ResultatenPage extends LitElement {
         <div class="card">
           <div class="card-title">BOB-Input</div>
           <div class="card-subtitle">Huidige verdeling van het ontwerp</div>
-
           <div class="data-table">
             <div class="data-row" style="font-size: 0.9em; color: #666; margin-bottom: 10px;">
-              <span></span>
-              <span>Gemiddeld:</span>
+              <span></span><span>Gemiddeld:</span>
             </div>
-
-            <div class="data-row">
-              <span class="data-label">Straat & Stoep:</span>
-              <span class="data-value" id="val-roads">--</span>
-            </div>
-            <div class="data-row">
-              <span class="data-label">Wooneenheden:</span>
-              <span class="data-value" id="val-buildings">--</span>
-            </div>
-            <div class="data-row">
-              <span class="data-label">Parkeren:</span>
-              <span class="data-value" id="val-parking">--</span>
-            </div>
-            <div class="data-row">
-              <span class="data-label">Tuin prive:</span>
-              <span class="data-value" id="val-gardens">--</span>
-            </div>
-            <div class="data-row">
-              <span class="data-label">Groen publiek:</span>
-              <span class="data-value" id="val-public-green">--</span>
-            </div>
+            <div class="data-row"><span class="data-label">Straat & Stoep:</span><span class="data-value" id="val-roads">--</span></div>
+            <div class="data-row"><span class="data-label">Wooneenheden:</span><span class="data-value" id="val-buildings">--</span></div>
+            <div class="data-row"><span class="data-label">Parkeren:</span><span class="data-value" id="val-parking">--</span></div>
+            <div class="data-row"><span class="data-label">Tuin prive:</span><span class="data-value" id="val-gardens">--</span></div>
+            <div class="data-row"><span class="data-label">Groen publiek:</span><span class="data-value" id="val-public-green">--</span></div>
           </div>
         </div>
 
@@ -174,11 +159,40 @@ export class ResultatenPage extends LitElement {
             <div class="data-row" style="font-size: 0.9em; color: #666; margin-bottom: 10px;">
               <span></span><span>Resultaat:</span>
             </div>
+
             <div class="sub-header">Draagvlak per partij:</div>
-            <div class="data-row"><span class="data-label">Partij 1:</span><span class="data-value" id="unity-partij1">--</span></div>
-            <div class="data-row"><span class="data-label">Partij 2:</span><span class="data-value" id="unity-partij2">--</span></div>
-            <div class="data-row"><span class="data-label">Partij 3:</span><span class="data-value" id="unity-partij3">--</span></div>
-            <div class="data-row"><span class="data-label">Partij 4:</span><span class="data-value" id="unity-partij4">--</span></div>
+
+            <div class="data-row">
+              <span class="data-label">Partij 1:</span>
+              <div class="value-container">
+                <img id="img-partij1" src="${defaultImg}" class="status-icon" alt="" />
+                <span class="data-value" id="unity-partij1">--</span>
+              </div>
+            </div>
+
+            <div class="data-row">
+              <span class="data-label">Partij 2:</span>
+              <div class="value-container">
+                <img id="img-partij2" src="${defaultImg}" class="status-icon" alt="" />
+                <span class="data-value" id="unity-partij2">--</span>
+              </div>
+            </div>
+
+            <div class="data-row">
+              <span class="data-label">Partij 3:</span>
+              <div class="value-container">
+                <img id="img-partij3" src="${defaultImg}" class="status-icon" alt="" />
+                <span class="data-value" id="unity-partij3">--</span>
+              </div>
+            </div>
+
+            <div class="data-row">
+              <span class="data-label">Partij 4:</span>
+              <div class="value-container">
+                <img id="img-partij4" src="${defaultImg}" class="status-icon" alt="" />
+                <span class="data-value" id="unity-partij4">--</span>
+              </div>
+            </div>
 
           </div>
         </div>
@@ -189,8 +203,6 @@ export class ResultatenPage extends LitElement {
             <canvas id="landUseChart"></canvas>
           </div>
         </div>
-
-
 
       </div>
     `;
