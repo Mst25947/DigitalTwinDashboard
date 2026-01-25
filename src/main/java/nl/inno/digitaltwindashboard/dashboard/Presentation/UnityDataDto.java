@@ -15,5 +15,5 @@ public class UnityDataDto {
     public float draagvlakPartij3;
     public float draagvlakPartij4;
     public float doelAverage;
-    public float budgetAverage;
+    public float budgetAverage; 
 }
