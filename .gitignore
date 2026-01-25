@@ -33,3 +33,7 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# --- Unity WebGL build ---
+!webapp/TestBuild/Build/
+!webapp/TestBuild/Build/**
