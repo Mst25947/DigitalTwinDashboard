@@ -1,24 +1,31 @@
-import {LitElement, html} from "lit";
+import { LitElement, html, css } from "lit";
 
-class UnityGamePage extends LitElement{
-    render() {
-        return html`
-            <style>
-                div {
-                    height: calc(100vh - var(--nav-bar-height, 60px));
-                    width: 100%;
-                }
-                iframe{
-                    height: 100%;
-                    width: 100%;
-                    border: none;
-                }
-            </style>
-        <div>
-            <iframe src="/bobgame.html"></iframe>
-        </div>
-        `
+class UnityGamePage extends LitElement {
+  static styles = css`
+    :host {
+      display: block;
+      height: calc(100vh - var(--nav-bar-height, 60px));
     }
+
+    .container {
+      height: 100%;
+      width: 100%;
+    }
+
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+  `;
+
+  render() {
+    return html`
+      <div class="container">
+        <iframe src="/index.html"></iframe>
+      </div>
+    `;
+  }
 }
 
-customElements.define('unity-game-page', UnityGamePage)
+customElements.define("unity-game-page", UnityGamePage);

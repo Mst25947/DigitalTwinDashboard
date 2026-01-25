@@ -84,7 +84,7 @@ export function initDashboard(root, imgPaths) {
                 return;
             }
 
-            const val = Number(rawValue);
+            const val = Number(rawValue) /10;
             textEl.textContent = val.toFixed(1);
 
             textEl.classList.remove('status-green', 'status-orange', 'status-red');
