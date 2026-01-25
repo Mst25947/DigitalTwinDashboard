@@ -91,19 +91,12 @@ export function initDashboard(root, imgPaths) {
             if(imgEl) imgEl.classList.remove('status-icon-red', 'status-icon-orange', 'status-icon-green');
 
             // --- LOGICA VOOR KLEUR EN PLAATJE ---
-            if (val < 5) {
+            if (val < 7.5) {
                 // ROOD + SAD
                 textEl.classList.add('status-red');
                 if(imgEl) {
                     imgEl.src = images.sadImg; // Variabele
                     imgEl.classList.add('status-icon-red');
-                }
-            } else if (val < 7.5) {
-                // ORANJE + DEFAULT
-                textEl.classList.add('status-orange');
-                if(imgEl) {
-                    imgEl.src = images.defaultImg; // Variabele
-                    imgEl.classList.add('status-icon-orange');
                 }
             } else {
                 // GROEN + HAPPY
