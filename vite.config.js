@@ -38,8 +38,6 @@ export default {
         '**/*.wasm',
     ],
 
-    publicDir: 'js/pages/TestBuild',
-
     plugins: [rewriteToDashboard()],
     server: {
         proxy: {
