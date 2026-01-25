@@ -66,53 +66,65 @@ export function initDashboard(root, imgPaths) {
 
     function updateUnityCard(data) {
 
-        const setScoreWithVisuals = (textId, imgId, rawValue) => {
-            const textEl = get(textId);
-            const imgEl = get(imgId);
+    
 
-            if (!textEl) return;
+    const setScoreWithVisuals = (textId, imgId, rawValue) => {
+        const textEl = get(textId);
+        const imgEl = get(imgId);
 
-            // Reset alles als er geen data is
-            if (rawValue === undefined || rawValue === null) {
-                textEl.textContent = "-";
-                textEl.classList.remove('status-green', 'status-orange', 'status-red');
-                if(imgEl) {
-                    // Gebruik de variabele uit de import
-                    imgEl.src = images.defaultImg;
-                    imgEl.classList.remove('status-icon-red', 'status-icon-orange', 'status-icon-green');
-                }
-                return;
-            }
+        if (!textEl) return;
 
-            const val = Number(rawValue) /10;
-            textEl.textContent = val.toFixed(1);
-
+        if (rawValue === undefined || rawValue === null) {
+            textEl.textContent = "-";
             textEl.classList.remove('status-green', 'status-orange', 'status-red');
-            if(imgEl) imgEl.classList.remove('status-icon-red', 'status-icon-orange', 'status-icon-green');
-
-            // --- LOGICA VOOR KLEUR EN PLAATJE ---
-            if (val < 7.5) {
-                // ROOD + SAD
-                textEl.classList.add('status-red');
-                if(imgEl) {
-                    imgEl.src = images.sadImg; // Variabele
-                    imgEl.classList.add('status-icon-red');
-                }
-            } else {
-                // GROEN + HAPPY
-                textEl.classList.add('status-green');
-                if(imgEl) {
-                    imgEl.src = images.happyImg; // Variabele
-                    imgEl.classList.add('status-icon-green');
-                }
+            if(imgEl) {
+                imgEl.src = images.defaultImg;
+                imgEl.classList.remove('status-icon-red', 'status-icon-orange', 'status-icon-green');
             }
-        };
+            return;
+        }
 
-        setScoreWithVisuals("unity-partij1", "img-partij1", data.draagvlakPartij1);
-        setScoreWithVisuals("unity-partij2", "img-partij2", data.draagvlakPartij2);
-        setScoreWithVisuals("unity-partij3", "img-partij3", data.draagvlakPartij3);
-        setScoreWithVisuals("unity-partij4", "img-partij4", data.draagvlakPartij4);
-    }
+        const val = normalizeToTenScale(rawValue);
+        textEl.textContent = val.toFixed(1);
+
+        textEl.classList.remove('status-green', 'status-orange', 'status-red');
+        if(imgEl) imgEl.classList.remove('status-icon-red', 'status-icon-orange', 'status-icon-green');
+
+        if (val < 7.5) {
+            textEl.classList.add('status-red');
+            if(imgEl) {
+                imgEl.src = images.sadImg;
+                imgEl.classList.add('status-icon-red');
+            }
+        } else {
+            textEl.classList.add('status-green');
+            if(imgEl) {
+                imgEl.src = images.happyImg;
+                imgEl.classList.add('status-icon-green');
+            }
+        }
+    };
+
+    setScoreWithVisuals("unity-partij1", "img-partij1", data.draagvlakPartij1);
+    setScoreWithVisuals("unity-partij2", "img-partij2", data.draagvlakPartij2);
+    setScoreWithVisuals("unity-partij3", "img-partij3", data.draagvlakPartij3);
+    setScoreWithVisuals("unity-partij4", "img-partij4", data.draagvlakPartij4);
+}
+
+function normalizeToTenScale(value) {
+    if (value === null || value === undefined) return null;
+
+    const v = Number(value);
+
+    if (Number.isNaN(v)) return null;
+
+    if (v <= 1) return v * 10;
+
+    if (v > 10) return v / 10;
+
+    return v;
+}
+
 
     function createChart(indicators) {
         const chartCanvas = get("landUseChart");
