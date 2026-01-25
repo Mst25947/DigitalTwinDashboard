@@ -122,6 +122,49 @@ De database data wordt lokaal opgeslagen in:
 
 Deze map zorgt ervoor dat data behouden blijft wanneer de container opnieuw wordt gestart.
 
+## Runnen van database
+
+De database draait in een Docker container via **Docker Compose**.
+
+### Vereisten
+- Docker
+- Docker Compose
+
+### Database starten
+Ga naar de root van het project (waar `docker-compose.yml` staat) en voer uit:
+
+```bash
+docker compose up -d
+```
+
+Dit start een PostgreSQL database container met de volgende configuratie:
+
+- **Database:** `twin`
+- **Gebruiker:** `postgres`
+- **Wachtwoord:** `postgres`
+- **Poort:** `45432`
+- **Container naam:** `postgres_db_twin`
+
+### Database stoppen
+```bash
+docker compose down
+```
+
+### Controleren of de database draait
+```bash
+docker ps
+```
+
+Je zou de container `postgres_db_twin` moeten zien draaien.
+
+### Data persistentie
+De database data wordt lokaal opgeslagen in:
+
+```
+./postgres_data_twin
+```
+Deze map zorgt ervoor dat data behouden blijft wanneer de container opnieuw wordt gestart.
+
 ## Runnen van backend
 
 De backend is een **Spring Boot** applicatie en draait met **Maven**.
