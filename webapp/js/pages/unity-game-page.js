@@ -22,7 +22,7 @@ class UnityGamePage extends LitElement {
   render() {
     return html`
       <div class="container">
-        <iframe src="/index.html"></iframe>
+        <iframe src="index.html"></iframe>
       </div>
     `;
   }

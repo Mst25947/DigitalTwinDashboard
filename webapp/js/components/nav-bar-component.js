@@ -53,7 +53,7 @@ export class NavBar extends LitElement {
         <div id="navigational-items">
           <nav-bar-navigational-items label="Resultaten" route="/resultaten"></nav-bar-navigational-items>
           <nav-bar-separator></nav-bar-separator>
-          <nav-bar-navigational-items label="BOB-Game" route="/bob-game"></nav-bar-navigational-items>
+          <nav-bar-navigational-items label="BOB-Game" route="/"></nav-bar-navigational-items>
         </div>
     `;
     }
